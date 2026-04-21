@@ -1,0 +1,2493 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>고연승 서퍼 카드 — v3 (공유 카드 4종 + Detail)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
+<style>
+  :root {
+    --ink-deep: #05090F;
+    --ink: #0A1628;
+    --ink-surface: #12203A;
+    --gold: #D4A85E;
+    --gold-hi: #F3D180;
+    --gold-deep: #8E6F32;
+    --paper: #F5F1E8;
+    --paper-dim: #9FA6B6;
+    --coral: #E85D4A;
+    --shark-gray: #3E4759;
+    --tier-rare: #4A8BFF;
+    --tier-epic: #7B61FF;
+    --tier-legendary: #FF9D2E;
+    --radius: 22px;
+    --radius-sm: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: #05090F;
+    color: var(--paper);
+    font-family: "Pretendard Variable", Pretendard, sans-serif;
+  }
+  body { padding: 60px 24px 120px; min-height: 100vh; }
+
+  /* 페이지 타이틀 */
+  .page-title { max-width: 1160px; margin: 0 auto 56px; text-align: center; }
+  .page-title .meta {
+    font-family: "JetBrains Mono", monospace; font-size: 11px;
+    color: var(--gold); letter-spacing: 0.3em; margin-bottom: 14px;
+  }
+  .page-title h1 {
+    font-family: "Anton", sans-serif;
+    font-size: 56px; letter-spacing: 0.04em; color: var(--paper);
+    line-height: 1; font-weight: 400;
+  }
+  .page-title h1 .gold { color: var(--gold-hi); }
+  .page-title p { font-size: 14px; color: var(--paper-dim); margin-top: 14px; line-height: 1.7; }
+  .page-title .changes {
+    display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+    margin-top: 20px;
+  }
+  .page-title .tag {
+    font-family: "JetBrains Mono", monospace; font-size: 10px;
+    padding: 5px 10px; background: rgba(212,168,94,0.12);
+    border: 1px solid rgba(212,168,94,0.3);
+    color: var(--gold-hi); letter-spacing: 0.08em; border-radius: 3px;
+  }
+
+  /* 공유 카드 섹션 */
+  .share-section { max-width: 1160px; margin: 0 auto; }
+  .share-section .section-label {
+    font-family: "JetBrains Mono", monospace; font-size: 11px;
+    color: var(--gold); letter-spacing: 0.22em; margin-bottom: 20px;
+  }
+  .share-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px; margin-bottom: 60px;
+  }
+  @media (max-width: 1100px) { .share-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .share-grid { grid-template-columns: 1fr; } }
+
+  /* Flex Card 공통 (1:1 정사각) */
+  .card {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    background: var(--ink-deep);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 24px 48px -16px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,168,94,0.2) inset;
+    color: var(--paper);
+    animation: cardIn 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .card:nth-child(1) { animation-delay: 0.0s; }
+  .card:nth-child(2) { animation-delay: 0.1s; }
+  .card:nth-child(3) { animation-delay: 0.2s; }
+  .card:nth-child(4) { animation-delay: 0.3s; }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(18px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .card .top-row {
+    position: absolute; top: 0; left: 0; right: 0;
+    padding: 18px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: "JetBrains Mono", monospace; font-size: 10px;
+    color: var(--gold); letter-spacing: 0.25em;
+    background: linear-gradient(to bottom, rgba(5,9,15,0.78) 0%, rgba(5,9,15,0.5) 50%, transparent 100%);
+    z-index: 2;
+  }
+  .card .drop-label {
+    padding: 4px 10px; background: var(--gold); color: var(--ink-deep);
+    font-family: "Pretendard Variable", Pretendard, sans-serif;
+    font-weight: 800; letter-spacing: 0.1em;
+    font-size: 10.5px; border-radius: 2px;
+  }
+
+  .card .bottom-row {
+    position: absolute; bottom: 18px; left: 18px; right: 18px;
+    display: flex; justify-content: space-between; align-items: flex-end;
+    z-index: 3;
+  }
+  .card .brand {
+    font-family: "Pretendard Variable", Pretendard, sans-serif;
+    font-weight: 800;
+    font-size: 12.5px;
+    letter-spacing: 0.02em;
+    color: var(--paper);
+  }
+  .card .brand .sub {
+    font-weight: 500;
+    color: var(--paper-dim);
+    margin-left: 5px;
+    letter-spacing: 0.01em;
+  }
+  .card .brand .dot { color: var(--gold); margin: 0 4px; }
+  .card .serial {
+    font-family: "JetBrains Mono", monospace; font-size: 9px;
+    color: var(--paper-dim); opacity: 0.55; letter-spacing: 0.2em;
+  }
+
+  /* 카드 전체를 SVG 캔버스로 덮음 (v3 히어로 잘림 버그 fix 2026-04-20) */
+  .hero-svg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+  }
+  .hero-svg svg { width: 100%; height: 100%; display: block; }
+
+  .card-copy {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 56px 22px 56px;
+    background: linear-gradient(to top, rgba(5,9,15,0.95) 0%, rgba(5,9,15,0.85) 35%, rgba(5,9,15,0.5) 70%, transparent 100%);
+    display: flex; flex-direction: column; align-items: flex-start;
+    z-index: 2;
+  }
+  .card-copy .kicker {
+    font-family: "Pretendard Variable"; font-size: 11px; font-weight: 600;
+    color: var(--paper-dim); letter-spacing: 0.06em; margin-bottom: 4px;
+  }
+  .card-copy .hero-num {
+    font-family: "Anton", sans-serif;
+    font-size: 72px; line-height: 0.95; color: var(--paper);
+    letter-spacing: -0.01em;
+  }
+  .card-copy .hero-num .unit {
+    font-family: "Pretendard Variable"; font-weight: 800;
+    font-size: 20px; color: var(--gold-hi); margin-left: 6px;
+    letter-spacing: 0;
+  }
+  .card-copy .hero-num-words { font-size: 42px; line-height: 0.95; }
+  /* Card 04 전용 — 등급 축(위)과 brand(아래) 사이 중간 배치 */
+  .card-copy.card-copy-lower { padding-top: 58px; padding-bottom: 48px; }
+  .card-copy.card-copy-lower .hero-num-words { font-size: 38px; line-height: 0.95; }
+  .card-copy.card-copy-lower .kicker { margin-bottom: 5px; }
+  .card-copy.card-copy-lower .subtitle { margin-top: 5px; }
+  .card-copy .hero-num-accent { color: var(--gold-hi); }
+  .card-copy .subtitle {
+    font-family: "Pretendard Variable"; font-size: 13px; font-weight: 600;
+    color: var(--gold-hi); margin-top: 6px;
+  }
+  .card-copy .subtitle .small { color: var(--paper-dim); font-weight: 500; margin-left: 6px; }
+
+  /* 애니메이션 (v3 fix 2026-04-20: individual transform properties 사용 — SVG transform attribute 와 충돌 회피, Codex 리뷰 지적 반영) */
+  @keyframes runner-bounce {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -4px; }
+  }
+  @keyframes runner-sway {
+    0%, 100% { rotate: -2deg; }
+    50% { rotate: 2deg; }
+  }
+  @keyframes rise-stagger {
+    from { opacity: 0; translate: 0 6px; }
+    to { opacity: 1; translate: 0 0; }
+  }
+  @keyframes fire-flicker {
+    0%, 100% { scale: 1; opacity: 1; }
+    50% { scale: 0.95; opacity: 0.85; }
+  }
+  @keyframes glow-pulse {
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(243,209,128,0.4)); }
+    50% { filter: drop-shadow(0 0 12px rgba(243,209,128,0.9)); }
+  }
+  @keyframes float-up {
+    0% { opacity: 0; translate: 0 0; }
+    50% { opacity: 0.8; }
+    100% { opacity: 0; translate: 0 -14px; }
+  }
+  @keyframes grow-in {
+    from { scale: 0.4; opacity: 0; }
+    to { scale: 1; opacity: 1; }
+  }
+  @keyframes cardIn {
+    from { opacity: 0; translate: 0 18px; scale: 0.97; }
+    to { opacity: 1; translate: 0 0; scale: 1; }
+  }
+
+  /* 파도 위 서핑 동기화 — 서프보드와 파도 path 가 같이 출렁 */
+  @keyframes wave-flow {
+    0%, 100% { translate: 0 0; }
+    25% { translate: -2px -1px; }
+    50% { translate: 0 1px; }
+    75% { translate: 2px -1px; }
+  }
+  .wave-path {
+    animation: wave-flow 3.2s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  /* 제낌 블록 — 골드 pulse (짜릿함) */
+  @keyframes gold-celebrate {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(243,209,128,0);
+      border-color: rgba(212,168,94,0.4);
+    }
+    50% {
+      box-shadow: 0 0 20px 3px rgba(243,209,128,0.45);
+      border-color: rgba(243,209,128,1);
+    }
+  }
+  .push-item.positive { animation: gold-celebrate 2.4s ease-in-out infinite; }
+  .push-item.positive .pi-value { text-shadow: 0 0 14px rgba(243,209,128,0.55); }
+
+  /* 지나간 라이더 블록 — 코랄 shake (오기) */
+  @keyframes coral-alert {
+    0%, 100% { translate: 0 0; border-color: rgba(232,93,74,0.35); }
+    10% { translate: -1px 0; border-color: rgba(232,93,74,0.9); }
+    20% { translate: 1px 0; }
+    30% { translate: -1px 0; }
+    40% { translate: 1px 0; }
+    50% { translate: 0 0; border-color: rgba(232,93,74,0.6); box-shadow: 0 0 14px 2px rgba(232,93,74,0.35); }
+    60% { box-shadow: 0 0 0 0 rgba(232,93,74,0); }
+  }
+  .push-item.negative { animation: coral-alert 4.2s ease-in-out infinite; }
+
+  /* 접근성: 움직임 민감 사용자 배려 */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* SVG 내부 transform-box 를 fill-box 로 고정해야 CSS transform-origin 이 엘리먼트 bbox 기준으로 해석됨 (기본 view-box 기준이면 회전 시 사람이 서프보드 밖으로 튐) */
+  .runner, .runner-body, .fire-icon, .fallen, .trail {
+    transform-box: fill-box;
+  }
+  .runner { animation: runner-bounce 0.9s ease-in-out infinite; transform-origin: 50% 100%; }
+  .runner-body { animation: runner-sway 1.1s ease-in-out infinite; transform-origin: 50% 100%; }
+  .fallen { animation: rise-stagger 0.7s ease-out both; opacity: 0; }
+  .fallen:nth-of-type(1) { animation-delay: 0.3s; }
+  .fallen:nth-of-type(2) { animation-delay: 0.4s; }
+  .fallen:nth-of-type(3) { animation-delay: 0.5s; }
+  .fallen:nth-of-type(4) { animation-delay: 0.6s; }
+  .fallen:nth-of-type(5) { animation-delay: 0.7s; }
+  .fallen:nth-of-type(6) { animation-delay: 0.8s; }
+  .fallen:nth-of-type(7) { animation-delay: 0.9s; }
+
+  .fire-icon { animation: fire-flicker 1.4s ease-in-out infinite; transform-origin: center bottom; }
+  .fire-icon:nth-of-type(2) { animation-delay: 0.1s; }
+  .fire-icon:nth-of-type(3) { animation-delay: 0.2s; }
+  .fire-icon:nth-of-type(4) { animation-delay: 0.3s; }
+  .fire-icon:nth-of-type(5) { animation-delay: 0.4s; }
+  .fire-icon:nth-of-type(6) { animation-delay: 0.5s; }
+  .fire-icon:nth-of-type(7) { animation-delay: 0.6s; }
+  .glow { animation: glow-pulse 2.4s ease-in-out infinite; }
+  .trail { animation: float-up 2.2s ease-in-out infinite; }
+  .trail:nth-of-type(2) { animation-delay: 0.7s; }
+  .trail:nth-of-type(3) { animation-delay: 1.4s; }
+
+  /* ==== 도장 (업적 배지) - 한자 제거, 한국어 + SVG 심볼 ==== */
+  .seal-mini-row {
+    position: absolute; top: 46px; right: 18px;
+    display: flex; gap: 5px;
+  }
+  .seal-mini {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 1px solid var(--gold); display: flex; align-items: center; justify-content: center;
+    background: rgba(212,168,94,0.08);
+  }
+  .seal-mini svg { width: 12px; height: 12px; }
+  .seal-mini.locked { border-color: rgba(158,166,182,0.3); opacity: 0.35; }
+  .seal-mini.locked svg { opacity: 0.4; }
+
+  /* ========= Detail Card ========= */
+  .detail-wrap { max-width: 460px; margin: 0 auto; }
+  .detail-card {
+    background: var(--ink-deep);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 40px 80px -24px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,168,94,0.15) inset;
+    animation: cardIn 1s 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .dc-head {
+    padding: 28px 26px 20px; text-align: center;
+    border-bottom: 1px solid rgba(212,168,94,0.18);
+  }
+  .dc-head .drop-label {
+    display: inline-block; padding: 5px 12px; background: var(--gold);
+    color: var(--ink-deep);
+    font-family: "Pretendard Variable", Pretendard, sans-serif;
+    font-weight: 800; font-size: 11.5px;
+    letter-spacing: 0.12em; border-radius: 3px;
+  }
+  .dc-head .drop-num {
+    margin-top: 8px; font-family: "JetBrains Mono"; font-size: 10px;
+    color: var(--gold); letter-spacing: 0.22em;
+  }
+  .dc-head .dc-student {
+    margin-top: 14px; font-family: "Pretendard Variable";
+    font-weight: 800; font-size: 22px; color: var(--paper);
+  }
+  .dc-head .dc-student-sub {
+    margin-top: 2px; font-family: "JetBrains Mono"; font-size: 10px;
+    color: var(--paper-dim); letter-spacing: 0.2em;
+  }
+
+  .block { padding: 26px 26px; border-bottom: 1px solid rgba(212,168,94,0.1); }
+  .block-title-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+  .block-title {
+    font-family: "Anton"; font-size: 22px; letter-spacing: 0.14em; color: var(--paper);
+  }
+  .block-title .gold { color: var(--gold-hi); }
+  .block-code {
+    font-family: "JetBrains Mono"; font-size: 10px; color: var(--gold); letter-spacing: 0.2em;
+  }
+  .block-sub { font-size: 12px; color: var(--paper-dim); margin-bottom: 18px; }
+
+  /* Detail 히어로 (가로 파도 위 서핑) — 상단 여백 확보로 말풍선 공간 */
+  .detail-hero {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: linear-gradient(180deg, rgba(212,168,94,0.06), transparent 65%);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(212,168,94,0.15);
+    overflow: hidden; margin-top: 6px;
+  }
+  .detail-hero svg { width: 100%; height: 100%; display: block; }
+  .dc-caption {
+    margin-top: 12px; font-family: "Pretendard Variable";
+    font-weight: 600; font-size: 14px; color: var(--paper); line-height: 1.6;
+  }
+  .dc-caption .accent { color: var(--gold-hi); font-weight: 700; }
+  .dc-caption .coral { color: var(--coral); font-weight: 700; }
+
+  .push-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px;
+  }
+  .push-item {
+    background: rgba(255,255,255,0.025); border: 1px solid rgba(212,168,94,0.14);
+    border-radius: var(--radius-sm); padding: 13px;
+  }
+  .push-item .pi-label { font-size: 11px; color: var(--paper-dim); font-weight: 600; margin-bottom: 6px; }
+  .push-item .pi-value {
+    font-family: "Anton"; font-size: 34px; color: var(--paper); line-height: 1;
+  }
+  .push-item .pi-value .unit {
+    font-family: "Pretendard Variable"; font-size: 12px; font-weight: 600;
+    color: var(--paper-dim); margin-left: 3px;
+  }
+  .push-item .pi-caption { font-size: 11px; color: var(--paper-dim); margin-top: 4px; line-height: 1.4; }
+  .push-item.positive { border-color: rgba(212,168,94,0.4); }
+  .push-item.positive .pi-value { color: var(--gold-hi); }
+  .push-item.negative { border-color: rgba(232,93,74,0.35); }
+  .push-item.negative .pi-value { color: var(--coral); }
+
+  /* 업적 5종 세로 리스트 */
+  .seal-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .seal-row {
+    display: grid; grid-template-columns: 40px 1fr auto;
+    align-items: center; gap: 12px; padding: 10px 12px;
+    background: rgba(255,255,255,0.02); border-radius: var(--radius-sm);
+    border: 1px solid rgba(212,168,94,0.12);
+  }
+  .seal-row.earned { border-color: rgba(212,168,94,0.45); }
+  .seal-row.earned .seal-circle { border-color: var(--gold); color: var(--gold-hi); }
+  .seal-row.earned .seal-name { color: var(--gold-hi); font-weight: 700; }
+  .seal-circle {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 1.5px dashed rgba(158,166,182,0.3);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--shark-gray);
+  }
+  .seal-circle svg { width: 20px; height: 20px; }
+  .seal-circle.earned { border-style: solid; box-shadow: 0 0 10px rgba(212,168,94,0.3); }
+  .seal-name {
+    font-family: "Pretendard Variable"; font-weight: 600; font-size: 14px;
+    color: var(--paper-dim);
+  }
+  .seal-desc { font-size: 11px; color: var(--paper-dim); margin-top: 2px; }
+  .seal-progress {
+    font-family: "JetBrains Mono"; font-size: 10px;
+    color: var(--gold); letter-spacing: 0.08em;
+  }
+
+  /* 분석 */
+  .analysis-row {
+    display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px;
+    padding: 14px 16px; background: rgba(255,255,255,0.025);
+    border-radius: var(--radius-sm); border-left: 3px solid var(--gold);
+    margin-bottom: 10px;
+  }
+  .analysis-row.weak { border-left-color: var(--coral); }
+  .analysis-row .ar-label {
+    font-size: 10px; color: var(--paper-dim); font-family: "JetBrains Mono"; letter-spacing: 0.15em;
+  }
+  .analysis-row .ar-main {
+    font-family: "Pretendard Variable"; font-size: 16px; color: var(--paper);
+    font-weight: 700; margin-top: 3px;
+  }
+  .analysis-row .ar-main .chg {
+    font-family: "JetBrains Mono"; font-size: 12px; color: var(--gold); margin-left: 6px; font-weight: 700;
+  }
+  .analysis-row .ar-cta {
+    font-family: "Pretendard Variable"; font-weight: 700; font-size: 11px;
+    padding: 7px 11px; border-radius: 999px;
+    background: var(--gold); color: var(--ink-deep); text-decoration: none;
+  }
+
+  .cohort-card {
+    margin-top: 14px; padding: 14px;
+    background: linear-gradient(135deg, rgba(245,241,232,0.04), transparent);
+    border-radius: var(--radius-sm); border: 1px solid rgba(245,241,232,0.08);
+  }
+  .cohort-card .cc-label {
+    font-family: "JetBrains Mono"; font-size: 10px; color: var(--gold); letter-spacing: 0.2em;
+  }
+  .cohort-card .cc-body { margin-top: 6px; font-size: 13px; line-height: 1.65; color: var(--paper-dim); }
+  .cohort-card .cc-body strong { color: var(--paper); font-weight: 700; }
+
+  .mentor {
+    background: var(--ink-surface); padding: 18px 20px;
+    border-radius: var(--radius-sm); margin-top: 12px;
+    position: relative;
+  }
+  .mentor::before {
+    content: "⊗"; position: absolute; top: -10px; left: 14px;
+    font-family: "Anton"; font-size: 20px; color: var(--gold);
+    background: var(--ink-deep); padding: 0 6px;
+  }
+  .mentor .mentor-body {
+    font-family: "Pretendard Variable"; font-size: 13.5px; line-height: 1.7;
+    color: var(--paper);
+  }
+  .mentor .mentor-sign {
+    margin-top: 8px; font-family: "Anton"; font-size: 11px;
+    color: var(--gold); letter-spacing: 0.18em;
+  }
+
+  /* ==== Detail 탭 스위처 (radio 패턴 — JS 없이 CSS only) ==== */
+  .tab-container { position: relative; }
+  .tab-container input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+  .tab-switcher {
+    display: flex;
+    border-bottom: 1px solid rgba(212,168,94,0.18);
+    background: rgba(5,9,15,0.4);
+  }
+  .tab-switcher label {
+    flex: 1; text-align: center; padding: 16px 0;
+    font-family: "Pretendard Variable"; font-weight: 700; font-size: 13px;
+    color: var(--paper-dim); cursor: pointer;
+    letter-spacing: 0.08em;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+    user-select: none;
+  }
+  .tab-switcher label:hover { color: var(--paper); }
+  .tab-switcher label .tab-en {
+    display: block;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 8.5px; font-weight: 400;
+    color: var(--gold);
+    letter-spacing: 0.22em; margin-top: 3px;
+    opacity: 0.7;
+  }
+  .tab-pane { display: none; animation: tab-fade 0.35s ease-out both; }
+  #tab-week:checked ~ .tab-panes .tab-pane-week,
+  #tab-badge:checked ~ .tab-panes .tab-pane-badge,
+  #tab-analysis:checked ~ .tab-panes .tab-pane-analysis,
+  #tab-customize:checked ~ .tab-panes .tab-pane-customize { display: block; }
+  #tab-week:checked ~ .tab-switcher label[for="tab-week"],
+  #tab-badge:checked ~ .tab-switcher label[for="tab-badge"],
+  #tab-analysis:checked ~ .tab-switcher label[for="tab-analysis"],
+  #tab-customize:checked ~ .tab-switcher label[for="tab-customize"] {
+    color: var(--gold-hi); border-bottom-color: var(--gold);
+  }
+  @keyframes tab-fade {
+    from { opacity: 0; translate: 0 4px; }
+    to { opacity: 1; translate: 0 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tab-pane { animation: none; }
+  }
+
+  /* ==== 오리 말풍선 ==== */
+  .speech-bubble { transform-box: fill-box; animation: bubble-float 3.6s ease-in-out infinite; transform-origin: center; }
+  @keyframes bubble-float {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -2px; }
+  }
+
+  /* ==== Card 04 Grade Up — 오리가 화살표 있는 높이까지 올라옴 ==== */
+  @keyframes grade-up-entrance {
+    0% { translate: 0 55px; opacity: 0; scale: 0.85; }
+    60% { translate: 0 -58px; opacity: 1; scale: 1.05; }
+    80% { translate: 0 -46px; scale: 1; }
+    100% { translate: 0 -50px; opacity: 1; scale: 1; }
+  }
+  .grade-up-entrance {
+    animation: grade-up-entrance 2.4s 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+  }
+  @keyframes arrow-guide-up {
+    0% { translate: 0 45px; opacity: 0; }
+    45% { translate: 0 -10px; opacity: 1; }
+    75% { translate: 0 0; opacity: 0.95; }
+    100% { translate: 0 -4px; opacity: 0.85; }
+  }
+  .arrow-guide-up {
+    animation: arrow-guide-up 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+  }
+  @keyframes grade-up-trail {
+    0% { opacity: 0; translate: 0 30px; }
+    50% { opacity: 0.9; translate: 0 0; }
+    100% { opacity: 0; translate: 0 -20px; }
+  }
+  .grade-up-trail { animation: grade-up-trail 2.2s ease-out infinite; transform-box: fill-box; }
+  .grade-up-trail:nth-of-type(2) { animation-delay: 0.3s; }
+  .grade-up-trail:nth-of-type(3) { animation-delay: 0.6s; }
+  .grade-up-trail:nth-of-type(4) { animation-delay: 0.9s; }
+
+  /* ==== 사회적 callout (Duolingo Friend Streak 차용) ==== */
+  .social-callout {
+    margin-top: 14px; padding: 12px 14px;
+    background: linear-gradient(135deg, rgba(212,168,94,0.08), rgba(232,93,74,0.04));
+    border: 1px solid rgba(212,168,94,0.2);
+    border-left: 3px solid var(--gold);
+    border-radius: var(--radius-sm);
+    font-family: "Pretendard Variable"; font-size: 13px; line-height: 1.55;
+    color: var(--paper);
+  }
+  .social-callout .sc-accent { color: var(--gold-hi); font-weight: 700; }
+
+  /* ==== 클럽 스탬프 (Duolingo Streak Society 차용) ==== */
+  .club-stamp {
+    margin: 4px 0 18px;
+    padding: 16px 18px;
+    background: linear-gradient(135deg, rgba(212,168,94,0.12), transparent 70%);
+    border: 1px solid rgba(212,168,94,0.35);
+    border-radius: var(--radius-sm);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .club-stamp .cs-label {
+    font-family: "JetBrains Mono"; font-size: 9.5px;
+    color: var(--gold); letter-spacing: 0.25em;
+  }
+  .club-stamp .cs-name {
+    font-family: "Anton"; font-size: 18px;
+    color: var(--gold-hi); letter-spacing: 0.14em; margin-top: 4px;
+  }
+  .club-stamp .cs-count {
+    font-family: "JetBrains Mono"; font-size: 11px;
+    color: var(--paper-dim); letter-spacing: 0.1em;
+  }
+  .club-stamp .cs-count strong { color: var(--paper); font-size: 14px; font-weight: 700; }
+
+  /* ==== Dress Up ==== */
+  .dressup-note {
+    margin-top: 12px;
+    display: inline-flex;
+    padding: 7px 11px;
+    border-radius: 999px;
+    border: 1px solid rgba(212,168,94,0.28);
+    background: rgba(212,168,94,0.08);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9.5px;
+    color: var(--gold-hi);
+    letter-spacing: 0.16em;
+  }
+  .customize-shell { margin-top: 18px; display: flex; flex-direction: column; gap: 14px; }
+  .customize-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: 12px;
+  }
+  .customize-preview-card,
+  .customize-slot-panel {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(212,168,94,0.12);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+  }
+  .customize-preview-stage {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: calc(var(--radius-sm) - 2px);
+    background:
+      radial-gradient(circle at 78% 24%, rgba(243,209,128,0.2), transparent 32%),
+      linear-gradient(180deg, rgba(10,22,40,0.25), rgba(10,22,40,0.9));
+    border: 1px solid rgba(212,168,94,0.12);
+  }
+  .customize-preview-stage svg { width: 100%; height: 100%; display: block; }
+  .customize-preview-meta {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .customize-preview-meta .label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9.5px;
+    color: var(--gold);
+    letter-spacing: 0.18em;
+  }
+  .customize-preview-meta .set-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--paper);
+  }
+  .customize-preview-meta .set-note {
+    font-size: 12px;
+    color: var(--paper-dim);
+    line-height: 1.55;
+  }
+  .customize-slot-panel {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    align-content: start;
+  }
+  .slot-chip {
+    min-height: 54px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.09);
+    background: rgba(255,255,255,0.025);
+    color: var(--paper);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  }
+  .slot-chip:hover { transform: translateY(-1px); border-color: rgba(212,168,94,0.28); }
+  .slot-chip.is-active {
+    background: linear-gradient(135deg, rgba(243,209,128,0.92), rgba(212,168,94,0.92));
+    color: var(--ink-deep);
+    border-color: rgba(243,209,128,1);
+  }
+  .slot-chip .ko { font-weight: 800; font-size: 13px; }
+  .slot-chip .en {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 8.5px;
+    letter-spacing: 0.18em;
+    opacity: 0.8;
+  }
+  .inventory-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--paper-dim);
+  }
+  .inventory-meta strong {
+    color: var(--paper);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .inventory-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 176px;
+    padding: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  }
+  .inventory-item:hover { transform: translateY(-2px); }
+  .inventory-item.is-equipped {
+    box-shadow: 0 0 0 1px rgba(243,209,128,0.45) inset, 0 18px 24px -22px rgba(243,209,128,0.45);
+  }
+  .inventory-item.is-locked {
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .inventory-item.tier-N { border-color: rgba(78,88,104,0.95); }
+  .inventory-item.tier-R {
+    border-color: rgba(74,139,255,0.96);
+    box-shadow: 0 0 14px rgba(74,139,255,0.12);
+  }
+  .inventory-item.tier-E {
+    border-color: rgba(123,97,255,0.96);
+    box-shadow: 0 0 18px rgba(123,97,255,0.16);
+  }
+  .inventory-item.tier-L {
+    border-color: rgba(255,157,46,0.96);
+    box-shadow: 0 0 22px rgba(255,157,46,0.18);
+  }
+  .inventory-item.tier-M {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(rgba(255,255,255,0.03), rgba(255,255,255,0.03)) padding-box,
+      linear-gradient(135deg, #4A8BFF, #7B61FF, #F3D180) border-box;
+    box-shadow: 0 0 22px rgba(123,97,255,0.18);
+    animation: mythic-border 5.6s linear infinite;
+  }
+  @keyframes mythic-border {
+    0% { box-shadow: 0 0 18px rgba(74,139,255,0.15); }
+    50% { box-shadow: 0 0 24px rgba(123,97,255,0.22); }
+    100% { box-shadow: 0 0 18px rgba(243,209,128,0.18); }
+  }
+  .inventory-badges {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .inventory-pill {
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    background: rgba(255,255,255,0.06);
+    color: var(--paper-dim);
+  }
+  .inventory-pill.state { color: var(--gold-hi); }
+  .inventory-art {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 84px;
+    border-radius: 12px;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 74% 28%, rgba(243,209,128,0.12), transparent 34%),
+      rgba(10,22,40,0.72);
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .inventory-art svg { width: 100%; height: 100%; display: block; }
+  .inventory-item.is-locked .inventory-art {
+    filter: saturate(0.82) brightness(0.88);
+    opacity: 0.62;
+  }
+  .inventory-item.is-locked .inventory-art::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(180deg, rgba(5,9,15,0.0) 0%, rgba(5,9,15,0.22) 65%, rgba(5,9,15,0.42) 100%);
+    pointer-events: none;
+  }
+  .inventory-lock {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(5,9,15,0.72);
+    border: 1px solid rgba(245,241,232,0.18);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--paper);
+  }
+  .inventory-name {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--paper);
+    line-height: 1.4;
+  }
+  .inventory-item.is-equipped .inventory-name { color: var(--gold-hi); }
+  .inventory-mission {
+    font-size: 11px;
+    color: var(--paper-dim);
+    line-height: 1.55;
+  }
+  .inventory-item.is-locked .inventory-name,
+  .inventory-item.is-locked .inventory-mission { color: var(--paper-dim); }
+  .inventory-help {
+    margin-top: -2px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+  }
+  @media (max-width: 560px) {
+    .customize-top { grid-template-columns: 1fr; }
+    .inventory-grid { grid-template-columns: 1fr; }
+  }
+
+  /* CTA */
+  .cta-block { padding: 22px 26px 26px; background: #03060B; display: flex; flex-direction: column; gap: 10px; }
+  .share-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+  .share-btn {
+    padding: 13px 0; text-align: center;
+    background: transparent; border: 1px solid rgba(212,168,94,0.3);
+    border-radius: var(--radius-sm); cursor: pointer;
+    font-family: "Pretendard Variable"; font-weight: 700; font-size: 11px;
+    color: var(--gold-hi); letter-spacing: 0.02em;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    transition: all 0.2s;
+  }
+  .share-btn:hover { background: rgba(212,168,94,0.12); }
+  .share-btn .main { font-size: 13px; color: var(--gold); }
+  .winning-btn {
+    margin-top: 4px; padding: 14px;
+    background: var(--gold); color: var(--ink-deep);
+    border-radius: var(--radius-sm); text-align: center;
+    font-family: "Pretendard Variable"; font-weight: 800; font-size: 13px;
+    cursor: pointer; border: none; letter-spacing: -0.01em;
+    transition: all 0.2s;
+  }
+  .winning-btn:hover { background: var(--gold-hi); }
+
+  /* 카드 캡션 */
+  .card-caption {
+    margin-top: 12px; font-family: "Pretendard Variable"; font-size: 12px;
+    color: var(--paper-dim); line-height: 1.5; text-align: center;
+  }
+  .card-caption strong { color: var(--gold-hi); font-weight: 700; }
+
+  .detail-label {
+    font-family: "JetBrains Mono"; font-size: 11px; color: var(--gold);
+    letter-spacing: 0.22em; text-align: center; margin-bottom: 20px;
+  }
+
+  /* 각주 */
+  .footnote {
+    max-width: 1160px; margin: 80px auto 0;
+    padding-top: 32px; border-top: 1px solid rgba(212,168,94,0.15);
+    font-family: "Pretendard Variable"; font-size: 12px; color: var(--paper-dim);
+    line-height: 1.8;
+  }
+  .footnote h3 { font-family: "Anton"; color: var(--gold-hi); font-weight: 400; font-size: 18px; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .footnote ul { list-style: none; }
+  .footnote li::before { content: "· "; color: var(--gold); }
+</style>
+</head>
+<body>
+
+<header class="page-title">
+  <div class="meta">WEEKLY · SCORE REPORT · V3 · 2026.04.20</div>
+  <h1>일차 성적표 <span class="gold">/ 서퍼 카드</span></h1>
+  <p>공유 카드 4종 (1:1 정사각) + 상세 리포트 1종<br>등급은 상세에만, 공유 카드는 누구나 자랑 가능한 "업적·연속·누적·상승" 메트릭</p>
+  <div class="changes">
+    <span class="tag">V3.1 업데이트</span>
+    <span class="tag">파도 뒤 오리 무더기</span>
+    <span class="tag">상세 3탭 분리</span>
+    <span class="tag">업적 카피 정비</span>
+    <span class="tag">메타 용어 단순화</span>
+  </div>
+</header>
+
+<!-- ========= 공유 카드 4종 ========= -->
+<section class="share-section">
+  <div class="section-label">01 · 공유 카드 · 외부 공유용 4종 (1:1 정사각)</div>
+
+  <div class="share-grid">
+
+    <!-- ───── Card 1: Personal Best (이번 주 신기록) ───── -->
+    <div>
+      <div class="card" aria-label="이번 주 신기록 카드">
+        <div class="top-row">
+          <span class="drop-label">WINNING HOUSE</span>
+          <span>THIS WEEK</span>
+        </div>
+
+        <div class="hero-svg" aria-hidden="true">
+          <svg viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="waveA1" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#8E6F32" stop-opacity="0.25"/>
+                <stop offset="50%" stop-color="#D4A85E" stop-opacity="0.8"/>
+                <stop offset="100%" stop-color="#F3D180" stop-opacity="1"/>
+              </linearGradient>
+              <radialGradient id="spotA1" cx="78%" cy="40%" r="30%">
+                <stop offset="0%" stop-color="#F3D180" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#F3D180" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <ellipse cx="235" cy="100" rx="90" ry="70" fill="url(#spotA1)"/>
+
+            <!-- 물 수평선 (왼→오 상승 파도) — class wave-path: 서프보드와 동기 출렁 -->
+            <path class="wave-path" d="M 0,180 Q 75,170 120,160 T 210,120 Q 255,95 300,75"
+                  stroke="url(#waveA1)" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <!-- 파도 아래 어두운 채움 -->
+            <path d="M 0,180 Q 75,170 120,160 T 210,120 Q 255,95 300,75 L 300,260 L 0,260 Z"
+                  fill="#0A1628" opacity="0.7"/>
+            <path d="M 0,192 Q 70,184 130,176 T 230,144 T 300,108 L 300,260 L 0,260 Z"
+                  fill="#060E1D" opacity="0.9"/>
+
+            <!-- 파도 뒤 회색 오리 무더기 (제낀 라이더 7명) — 메인 오리 왼쪽 뒤에 쌓여있음 -->
+            <g>
+              <!-- 7. 가장 뒤 작은 오리 -->
+              <g transform="translate(152,150)"><g class="fallen" opacity="0.42">
+                <ellipse cx="0" cy="0" rx="5.5" ry="4" fill="#4E5868"/>
+                <circle cx="3" cy="-4" r="3" fill="#4E5868"/>
+                <ellipse cx="5.8" cy="-4" rx="2" ry="0.7" fill="#3E4759"/>
+                <circle cx="3.5" cy="-4.8" r="0.5" fill="#0A1628"/>
+              </g></g>
+              <!-- 6. 뒤 왼쪽 -->
+              <g transform="translate(172,140)"><g class="fallen" opacity="0.48">
+                <ellipse cx="0" cy="0" rx="6.3" ry="4.5" fill="#4E5868"/>
+                <circle cx="3.5" cy="-4.8" r="3.2" fill="#4E5868"/>
+                <ellipse cx="6.5" cy="-4.8" rx="2.2" ry="0.8" fill="#3E4759"/>
+                <circle cx="4" cy="-5.6" r="0.55" fill="#0A1628"/>
+              </g></g>
+              <!-- 5. 중앙 뒤 (살짝 가림) -->
+              <g transform="translate(190,132)"><g class="fallen" opacity="0.52">
+                <ellipse cx="0" cy="0" rx="6.8" ry="5" fill="#4E5868"/>
+                <circle cx="4" cy="-5.3" r="3.5" fill="#4E5868"/>
+                <ellipse cx="7" cy="-5.3" rx="2.3" ry="0.85" fill="#3E4759"/>
+                <circle cx="4.5" cy="-6.2" r="0.6" fill="#0A1628"/>
+              </g></g>
+              <!-- 4. 중앙 앞 -->
+              <g transform="translate(205,125)"><g class="fallen" opacity="0.58">
+                <ellipse cx="0" cy="0" rx="7.2" ry="5.2" fill="#4E5868"/>
+                <circle cx="4" cy="-5.7" r="3.8" fill="#4E5868"/>
+                <ellipse cx="7.4" cy="-5.7" rx="2.5" ry="0.9" fill="#3E4759"/>
+                <circle cx="5" cy="-6.8" r="0.65" fill="#0A1628"/>
+              </g></g>
+              <!-- 3. 메인 오리 가장 가까이 -->
+              <g transform="translate(215,115)"><g class="fallen" opacity="0.6">
+                <ellipse cx="0" cy="0" rx="6.8" ry="4.8" fill="#4E5868"/>
+                <circle cx="3.8" cy="-5.2" r="3.5" fill="#4E5868"/>
+                <ellipse cx="7" cy="-5.2" rx="2.3" ry="0.85" fill="#3E4759"/>
+                <circle cx="4.5" cy="-6" r="0.6" fill="#0A1628"/>
+              </g></g>
+              <!-- 2. 앞쪽 낮은 무더기 -->
+              <g transform="translate(185,152)"><g class="fallen" opacity="0.5">
+                <ellipse cx="0" cy="0" rx="6" ry="4.2" fill="#4E5868"/>
+                <circle cx="3.5" cy="-4.5" r="3" fill="#4E5868"/>
+                <ellipse cx="6" cy="-4.5" rx="2" ry="0.75" fill="#3E4759"/>
+                <circle cx="4" cy="-5.2" r="0.5" fill="#0A1628"/>
+              </g></g>
+              <!-- 1. 앞쪽 중간 -->
+              <g transform="translate(210,145)"><g class="fallen" opacity="0.55">
+                <ellipse cx="0" cy="0" rx="6.5" ry="4.6" fill="#4E5868"/>
+                <circle cx="3.8" cy="-5" r="3.2" fill="#4E5868"/>
+                <ellipse cx="6.5" cy="-5" rx="2.2" ry="0.8" fill="#3E4759"/>
+                <circle cx="4.2" cy="-5.7" r="0.55" fill="#0A1628"/>
+              </g></g>
+            </g>
+
+            <!-- 물 입자/버블 -->
+            <circle class="trail" cx="80" cy="175" r="1.2" fill="#F3D180" opacity="0"/>
+            <circle class="trail" cx="140" cy="160" r="1" fill="#F3D180" opacity="0"/>
+            <circle class="trail" cx="180" cy="140" r="1.5" fill="#F3D180" opacity="0"/>
+
+            <!-- 파도 꼭대기 오른쪽 서핑 라이더 -->
+            <g transform="translate(235,75)"><g class="runner">
+              <g class="duck-slot duck-slot-ride" data-slot-name="ride" data-slot-scale="1"></g>
+              <g class="runner-body">
+                <!-- 꼬리 (왼쪽 뒤) -->
+                <path d="M -11,1 L -15,-2 L -10,5 Z" fill="#D4A85E"/>
+                <!-- 몸통 (둥글고 통통) -->
+                <ellipse cx="0" cy="4" rx="11" ry="10" fill="#F3D180"/>
+                <!-- 배 하이라이트 -->
+                <ellipse cx="0" cy="7" rx="6.5" ry="5.5" fill="#FFF4D6"/>
+                <g class="duck-slot duck-slot-body" data-slot-name="body" data-slot-scale="1"></g>
+                <!-- 날개 -->
+                <ellipse cx="-4" cy="3" rx="4.5" ry="6" fill="#D4A85E"/>
+                <!-- 머리 -->
+                <circle cx="1" cy="-9" r="7.5" fill="#F3D180"/>
+                <g class="duck-slot duck-slot-head" data-slot-name="head" data-slot-scale="1"></g>
+                <g class="duck-slot duck-slot-extra" data-slot-name="extra" data-slot-scale="1"></g>
+                <!-- 부리 위 (오른쪽 앞) -->
+                <ellipse cx="8" cy="-8" rx="4.5" ry="1.7" fill="#E85D4A"/>
+                <!-- 부리 아래 -->
+                <ellipse cx="7.8" cy="-6.6" rx="3.8" ry="1.2" fill="#C03B28"/>
+                <!-- 눈 -->
+                <circle cx="4" cy="-11" r="1.8" fill="#0A1628"/>
+                <circle cx="4.5" cy="-11.5" r="0.7" fill="#F5F1E8"/>
+                <!-- 볼 홍조 -->
+                <circle cx="-1.5" cy="-7" r="1.6" fill="#FFB3A0" opacity="0.55"/>
+                <g class="duck-slot duck-slot-feet" data-slot-name="feet" data-slot-scale="1"></g>
+              </g>
+            </g></g>
+
+            <!-- 상승 스파크 -->
+            <text x="268" y="60" fill="#F3D180" font-family="Anton" font-size="16" opacity="0.8">↗</text>
+          </svg>
+        </div>
+
+        <div class="card-copy">
+          <div class="kicker">이번 주 제친 라이더</div>
+          <div class="hero-num">7<span class="unit">명</span></div>
+          <div class="subtitle">지난주 대비 +2 <span class="small">· 개인 최고</span></div>
+        </div>
+
+        <div class="bottom-row">
+          <span class="brand">고연승T<span class="sub">· Winning House</span></span>
+          <span class="serial">#KYS-04W3-PB</span>
+        </div>
+      </div>
+      <div class="card-caption">Card <strong>01</strong> · 이번 주 신기록 — 누구나 자랑 가능</div>
+    </div>
+
+    <!-- ───── Card 2: Streak (연속 출석) ───── -->
+    <div>
+      <div class="card" aria-label="연속 출석 카드">
+        <div class="top-row">
+          <span class="drop-label">WINNING HOUSE</span>
+          <span>STREAK</span>
+        </div>
+
+        <div class="hero-svg" aria-hidden="true">
+          <svg viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <radialGradient id="spotB1" cx="80%" cy="25%" r="40%">
+                <stop offset="0%" stop-color="#F3D180" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#F3D180" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="waveGradB" x1="0" y1="1" x2="1" y2="0">
+                <stop offset="0%" stop-color="#8E6F32" stop-opacity="0.35"/>
+                <stop offset="60%" stop-color="#D4A85E" stop-opacity="0.9"/>
+                <stop offset="100%" stop-color="#F3D180" stop-opacity="1"/>
+              </linearGradient>
+            </defs>
+            <ellipse cx="250" cy="70" rx="110" ry="85" fill="url(#spotB1)"/>
+
+            <!-- 큰 파도 (왼 하단에서 우 상단으로 상승) -->
+            <path class="wave-path" d="M 10,275 Q 60,250 100,225 T 180,160 Q 230,120 290,55"
+                  stroke="url(#waveGradB)" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <path d="M 10,275 Q 60,250 100,225 T 180,160 Q 230,120 290,55 L 300,300 L 0,300 Z"
+                  fill="#0A1628" opacity="0.6"/>
+            <path d="M 0,290 Q 60,265 110,235 T 190,170 Q 240,135 300,75 L 300,300 L 0,300 Z"
+                  fill="#060E1D" opacity="0.85"/>
+
+            <!-- 7단계 포인트 (아래 → 위로 상승) -->
+            <g font-family="JetBrains Mono" font-size="9">
+              <g class="fallen">
+                <circle cx="30" cy="255" r="3" fill="#8E6F32" opacity="0.6"/>
+                <text x="30" y="273" text-anchor="middle" fill="#6B7A8F" opacity="0.6">D1</text>
+              </g>
+              <g class="fallen">
+                <circle cx="65" cy="237" r="3" fill="#8E6F32" opacity="0.7"/>
+                <text x="65" y="253" text-anchor="middle" fill="#6B7A8F" opacity="0.65">D2</text>
+              </g>
+              <g class="fallen">
+                <circle cx="100" cy="212" r="3.2" fill="#D4A85E" opacity="0.8"/>
+                <text x="100" y="228" text-anchor="middle" fill="#9FA6B6" opacity="0.75">D3</text>
+              </g>
+              <g class="fallen">
+                <circle cx="135" cy="180" r="3.5" fill="#D4A85E" opacity="0.85"/>
+                <text x="135" y="198" text-anchor="middle" fill="#9FA6B6">D4</text>
+              </g>
+              <g class="fallen">
+                <circle cx="170" cy="148" r="3.8" fill="#F3D180" opacity="0.9"/>
+                <text x="170" y="168" text-anchor="middle" fill="#D4A85E">D5</text>
+              </g>
+              <g class="fallen">
+                <circle cx="210" cy="108" r="4" fill="#F3D180"/>
+                <text x="210" y="128" text-anchor="middle" fill="#F3D180">D6</text>
+              </g>
+            </g>
+
+            <!-- 상승 트레일 -->
+            <circle class="trail" cx="245" cy="100" r="2" fill="#F3D180" opacity="0"/>
+            <circle class="trail" cx="255" cy="90" r="1.5" fill="#F3D180" opacity="0"/>
+            <circle class="trail" cx="260" cy="80" r="2" fill="#F3D180" opacity="0"/>
+
+            <!-- 파도 꼭대기 오리 (D7) -->
+            <g transform="translate(260, 75)"><g class="runner">
+              <g class="duck-slot duck-slot-ride" data-slot-name="ride" data-slot-scale="0.95"></g>
+              <g class="runner-body">
+                <!-- 꼬리 -->
+                <path d="M -10,1 L -14,-2 L -9,5 Z" fill="#D4A85E"/>
+                <ellipse cx="0" cy="4" rx="10" ry="9" fill="#F3D180"/>
+                <ellipse cx="0" cy="7" rx="6" ry="5" fill="#FFF4D6"/>
+                <g class="duck-slot duck-slot-body" data-slot-name="body" data-slot-scale="1"></g>
+                <ellipse cx="-4" cy="3" rx="4" ry="5.5" fill="#D4A85E"/>
+                <circle cx="1" cy="-8" r="6.8" fill="#F3D180"/>
+                <g class="duck-slot duck-slot-head" data-slot-name="head" data-slot-scale="1"></g>
+                <g class="duck-slot duck-slot-extra" data-slot-name="extra" data-slot-scale="1"></g>
+                <ellipse cx="7.5" cy="-7" rx="4" ry="1.5" fill="#E85D4A"/>
+                <ellipse cx="7.3" cy="-5.8" rx="3.4" ry="1.1" fill="#C03B28"/>
+                <circle cx="3.5" cy="-10" r="1.6" fill="#0A1628"/>
+                <circle cx="4" cy="-10.5" r="0.6" fill="#F5F1E8"/>
+                <circle cx="-1.5" cy="-6" r="1.3" fill="#FFB3A0" opacity="0.55"/>
+                <g class="duck-slot duck-slot-feet" data-slot-name="feet" data-slot-scale="1"></g>
+              </g>
+            </g></g>
+
+            <!-- D7 라벨 (오리 아래로 이동, STREAK 상단 라벨과 겹침 방지) -->
+            <text x="260" y="112" text-anchor="middle" font-family="Anton" font-size="15"
+                  fill="#F3D180" letter-spacing="0.1em">D7</text>
+          </svg>
+        </div>
+
+        <div class="card-copy">
+          <div class="kicker">연속 라이딩</div>
+          <div class="hero-num">7<span class="unit">일</span></div>
+          <div class="subtitle">다음 마일스톤 · 14일 <span class="small">까지 +7</span></div>
+        </div>
+
+        <div class="bottom-row">
+          <span class="brand">고연승T<span class="sub">· Winning House</span></span>
+          <span class="serial">#KYS-04W3-STK</span>
+        </div>
+      </div>
+      <div class="card-caption">Card <strong>02</strong> · 연속 출석 · 듀오링고 공식</div>
+    </div>
+
+    <!-- ───── Card 3: Milestone (누적 마일스톤) ───── -->
+    <div>
+      <div class="card" aria-label="누적 마일스톤 카드">
+        <div class="top-row">
+          <span class="drop-label">WINNING HOUSE</span>
+          <span>MILESTONE</span>
+        </div>
+
+        <div class="hero-svg" aria-hidden="true">
+          <svg viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <radialGradient id="spotC1" cx="50%" cy="30%" r="60%">
+                <stop offset="0%" stop-color="#F3D180" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#F3D180" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <ellipse cx="150" cy="80" rx="160" ry="120" fill="url(#spotC1)"/>
+
+            <!-- 배경 큰 숫자 500 (아웃라인) -->
+            <text x="150" y="155" text-anchor="middle" font-family="Anton" font-size="130"
+                  fill="none" stroke="#D4A85E" stroke-width="2" opacity="0.16">500</text>
+
+            <!-- 중앙 트로피 -->
+            <g class="glow" transform="translate(150, 90)">
+              <!-- 손잡이 -->
+              <path d="M -18,-14 Q -28,-8 -18,-2" stroke="#D4A85E" stroke-width="2" fill="none"/>
+              <path d="M 18,-14 Q 28,-8 18,-2" stroke="#D4A85E" stroke-width="2" fill="none"/>
+              <!-- 컵 -->
+              <path d="M -18,-20 L 18,-20 L 15,8 Q 10,16 0,16 Q -10,16 -15,8 Z"
+                    fill="#F3D180" stroke="#D4A85E" stroke-width="1.2"/>
+              <!-- 별 장식 -->
+              <path d="M 0,-12 L 2.5,-5 L 9,-5 L 3.5,0 L 5.5,6 L 0,2 L -5.5,6 L -3.5,0 L -9,-5 L -2.5,-5 Z"
+                    fill="#FFF4D6" opacity="0.85"/>
+              <!-- 줄기 -->
+              <rect x="-3" y="16" width="6" height="6" fill="#D4A85E"/>
+              <!-- 받침대 -->
+              <rect x="-14" y="22" width="28" height="5" rx="1" fill="#8E6F32"/>
+              <rect x="-18" y="27" width="36" height="3" rx="1" fill="#5E4620"/>
+            </g>
+
+            <!-- 지평선 -->
+            <line x1="10" y1="180" x2="290" y2="180" stroke="#D4A85E" stroke-width="1" opacity="0.35"/>
+
+            <!-- 무덤: 어지러운 오리 무리 (통산 500명 제낀 라이더, 겹쳐 쌓임) -->
+            <!-- 가장 뒤쪽 레이어 (가장 작고 흐림) -->
+            <g transform="translate(40,192) scale(0.38)" opacity="0.2"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/></g></g>
+            <g transform="translate(70,188) scale(0.4)" opacity="0.22"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/></g></g>
+            <g transform="translate(100,195) scale(0.38)" opacity="0.2"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/></g></g>
+            <g transform="translate(132,188) scale(0.42)" opacity="0.24"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/></g></g>
+            <g transform="translate(168,194) scale(0.4)" opacity="0.22"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/></g></g>
+            <g transform="translate(200,188) scale(0.38)" opacity="0.2"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/></g></g>
+            <g transform="translate(232,192) scale(0.42)" opacity="0.24"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/></g></g>
+            <g transform="translate(262,188) scale(0.4)" opacity="0.22"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/></g></g>
+            <!-- 뒤 레이어 -->
+            <g transform="translate(30,208) scale(0.55)" opacity="0.33"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/></g></g>
+            <g transform="translate(60,212) scale(0.52)" opacity="0.32"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/></g></g>
+            <g transform="translate(90,205) scale(0.58)" opacity="0.35"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/></g></g>
+            <g transform="translate(120,210) scale(0.55)" opacity="0.33"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/></g></g>
+            <g transform="translate(150,206) scale(0.56)" opacity="0.34"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/></g></g>
+            <g transform="translate(180,212) scale(0.55)" opacity="0.33"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/></g></g>
+            <g transform="translate(212,205) scale(0.58)" opacity="0.35"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/></g></g>
+            <g transform="translate(244,210) scale(0.55)" opacity="0.33"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/></g></g>
+            <g transform="translate(272,206) scale(0.52)" opacity="0.3"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/></g></g>
+            <!-- 중간 레이어 (겹침 시작) -->
+            <g transform="translate(22,222) scale(0.7)" opacity="0.42"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(52,218) scale(0.72)" opacity="0.44"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(80,224) scale(0.7)" opacity="0.42"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(108,218) scale(0.72)" opacity="0.44"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(135,225) scale(0.7)" opacity="0.42"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(160,220) scale(0.72)" opacity="0.44"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(185,224) scale(0.7)" opacity="0.42"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(212,218) scale(0.72)" opacity="0.44"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(240,222) scale(0.7)" opacity="0.42"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(268,218) scale(0.68)" opacity="0.4"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <!-- 중간~앞 교차 (겹쳐 쌓임) -->
+            <g transform="translate(40,228) scale(0.78)" opacity="0.48"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(94,232) scale(0.8)" opacity="0.5"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(145,234) scale(0.78)" opacity="0.48"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(195,230) scale(0.8)" opacity="0.5"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(248,234) scale(0.78)" opacity="0.48"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <!-- 중앞 레이어 -->
+            <g transform="translate(15,244) scale(0.88)" opacity="0.55"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(36,240) scale(0.9)" opacity="0.57"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(62,246) scale(0.88)" opacity="0.55"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(88,240) scale(0.92)" opacity="0.58"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(115,246) scale(0.88)" opacity="0.55"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(140,240) scale(0.9)" opacity="0.57"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(165,246) scale(0.88)" opacity="0.55"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(192,242) scale(0.9)" opacity="0.57"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(218,247) scale(0.88)" opacity="0.55"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(245,241) scale(0.9)" opacity="0.57"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(275,246) scale(0.88)" opacity="0.55"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <!-- 맨 앞 (가장 큼) -->
+            <g transform="translate(18,262)" opacity="0.68"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(38,258)" opacity="0.65"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(58,263)" opacity="0.66"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(82,258)" opacity="0.68"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(105,264)" opacity="0.65"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(128,258)" opacity="0.66"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(152,263)" opacity="0.68"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(176,260)" opacity="0.66"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(200,264)" opacity="0.65"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(225,258)" opacity="0.68"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(250,263)" opacity="0.66"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(275,258)" opacity="0.65"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <!-- 겹침 오리 (무덤 분위기 — 앞뒤 사이 쌓임) -->
+            <g transform="translate(30,252) scale(0.92)" opacity="0.58"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(76,253) scale(0.93)" opacity="0.6"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(120,252) scale(0.92)" opacity="0.58"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(164,253) scale(0.93)" opacity="0.6"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(210,252) scale(0.92)" opacity="0.58"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+            <g transform="translate(258,254) scale(0.92)" opacity="0.6"><g class="fallen"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#4E5868"/><circle cx="3" cy="-4" r="3" fill="#4E5868"/><ellipse cx="5.5" cy="-4" rx="1.8" ry="0.6" fill="#3E4759"/></g></g>
+
+            <!-- Card 03 은 트로피가 히어로 — 서퍼 제거 -->
+
+          </svg>
+        </div>
+
+        <div class="card-copy">
+          <div class="kicker">통산 제친 라이더</div>
+          <div class="hero-num">500<span class="unit">명</span></div>
+          <div class="subtitle">통산 500명 돌파 <span class="small">· 이번 주</span></div>
+        </div>
+
+        <div class="bottom-row">
+          <span class="brand">고연승T<span class="sub">· Winning House</span></span>
+          <span class="serial">#KYS-04W3-MIL</span>
+        </div>
+      </div>
+      <div class="card-caption">Card <strong>03</strong> · 통산 마일스톤 · 장기전 드롭</div>
+    </div>
+
+    <!-- ───── Card 4: Grade Up (등급 상승자만) ───── -->
+    <div>
+      <div class="card" aria-label="등급 상승 카드">
+        <div class="top-row">
+          <span class="drop-label">WINNING HOUSE</span>
+          <span>GRADE UP</span>
+        </div>
+
+        <div class="hero-svg" aria-hidden="true">
+          <svg viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="goldL4" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#F3D180" stop-opacity="0"/>
+                <stop offset="20%" stop-color="#F3D180" stop-opacity="0.9"/>
+                <stop offset="100%" stop-color="#8E6F32" stop-opacity="0"/>
+              </linearGradient>
+              <radialGradient id="spotD1" cx="50%" cy="40%" r="45%">
+                <stop offset="0%" stop-color="#F3D180" stop-opacity="0.28"/>
+                <stop offset="100%" stop-color="#F3D180" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <ellipse cx="150" cy="110" rx="130" ry="100" fill="url(#spotD1)"/>
+
+            <!-- 수평 등급 축 (가로) -->
+            <line x1="30" y1="180" x2="270" y2="180" stroke="url(#goldL4)" stroke-width="2"/>
+            <line x1="30" y1="180" x2="270" y2="180" stroke="#D4A85E" stroke-width="0.5" opacity="0.3"/>
+
+            <!-- 5단 tick + 라벨 -->
+            <g font-family="Anton" font-size="14" fill="#9FA6B6">
+              <g opacity="0.4"><line x1="30" y1="174" x2="30" y2="186" stroke="#6B7A8F"/><text x="30" y="204" text-anchor="middle">05</text></g>
+              <g opacity="0.5"><line x1="90" y1="174" x2="90" y2="186" stroke="#6B7A8F"/><text x="90" y="204" text-anchor="middle">04</text></g>
+              <g class="glow"><line x1="150" y1="168" x2="150" y2="192" stroke="#F3D180" stroke-width="2"/><text x="150" y="208" text-anchor="middle" fill="#F3D180" font-size="18">03</text></g>
+              <g opacity="0.55"><line x1="210" y1="174" x2="210" y2="186" stroke="#D4A85E"/><text x="210" y="204" text-anchor="middle" fill="#D4A85E">02</text></g>
+              <g opacity="0.35"><line x1="270" y1="174" x2="270" y2="186" stroke="#9FA6B6"/><text x="270" y="204" text-anchor="middle">01</text></g>
+            </g>
+
+            <!-- 지난 위치 → 현재 위치 점선 -->
+            <path d="M 90,180 Q 120,120 150,180" stroke="#F3D180" stroke-width="1.5" stroke-dasharray="3,3" fill="none" opacity="0.65"/>
+
+            <!-- 지난 위치 (흐릿) -->
+            <g transform="translate(90,180)" opacity="0.35">
+              <circle cx="0" cy="-4" r="2.5" fill="#6B7A8F"/>
+              <line x1="0" y1="-1" x2="0" y2="6" stroke="#6B7A8F" stroke-width="1.8" stroke-linecap="round"/>
+              <line x1="0" y1="6" x2="-4" y2="11" stroke="#6B7A8F" stroke-width="1.8" stroke-linecap="round"/>
+              <line x1="0" y1="6" x2="4" y2="11" stroke="#6B7A8F" stroke-width="1.8" stroke-linecap="round"/>
+            </g>
+
+            <!-- 현재 위치 — 파도 위 서핑 라이더 (아래→위 상승 엔트런스 애니메이션) -->
+            <g transform="translate(150,150)" class="grade-up-entrance"><g class="runner">
+              <path d="M -22,14 Q -10,8 0,12 Q 12,10 22,18" stroke="#D4A85E" stroke-width="1.5" fill="none" opacity="0.6"/>
+              <g class="duck-slot duck-slot-ride" data-slot-name="ride" data-slot-scale="0.9"></g>
+              <g class="runner-body">
+                <!-- 꼬리 -->
+                <path d="M -10,1 L -14,-2 L -9,5 Z" fill="#D4A85E"/>
+                <!-- 몸통 -->
+                <ellipse cx="0" cy="4" rx="10" ry="9" fill="#F3D180"/>
+                <!-- 배 -->
+                <ellipse cx="0" cy="7" rx="6" ry="5" fill="#FFF4D6"/>
+                <g class="duck-slot duck-slot-body" data-slot-name="body" data-slot-scale="1"></g>
+                <!-- 날개 -->
+                <ellipse cx="-4" cy="3" rx="4" ry="5.5" fill="#D4A85E"/>
+                <!-- 머리 -->
+                <circle cx="1" cy="-8" r="6.8" fill="#F3D180"/>
+                <g class="duck-slot duck-slot-head" data-slot-name="head" data-slot-scale="1"></g>
+                <g class="duck-slot duck-slot-extra" data-slot-name="extra" data-slot-scale="1"></g>
+                <!-- 부리 위 -->
+                <ellipse cx="7.5" cy="-7" rx="4" ry="1.5" fill="#E85D4A"/>
+                <!-- 부리 아래 -->
+                <ellipse cx="7.3" cy="-5.8" rx="3.4" ry="1.1" fill="#C03B28"/>
+                <!-- 눈 -->
+                <circle cx="3.5" cy="-10" r="1.6" fill="#0A1628"/>
+                <circle cx="4" cy="-10.5" r="0.6" fill="#F5F1E8"/>
+                <!-- 볼 홍조 -->
+                <circle cx="-1.5" cy="-6" r="1.3" fill="#FFB3A0" opacity="0.55"/>
+                <g class="duck-slot duck-slot-feet" data-slot-name="feet" data-slot-scale="1"></g>
+              </g>
+            </g></g>
+
+            <!-- 화살표 (목표 지점 표시) -->
+            <g transform="translate(150,58)" class="arrow-guide-up">
+              <path d="M 0,-18 L -8,-6 L -3,-6 L -3,10 L 3,10 L 3,-6 L 8,-6 Z" fill="#F3D180"/>
+            </g>
+            <!-- 상승 트레일 (오리 뒤쪽 골드 궤적) -->
+            <circle class="grade-up-trail" cx="150" cy="180" r="1.8" fill="#F3D180"/>
+            <circle class="grade-up-trail" cx="148" cy="165" r="1.4" fill="#F3D180"/>
+            <circle class="grade-up-trail" cx="152" cy="148" r="1.6" fill="#F3D180"/>
+            <circle class="grade-up-trail" cx="150" cy="130" r="1.2" fill="#F3D180"/>
+          </svg>
+        </div>
+
+        <div class="card-copy card-copy-lower">
+          <div class="kicker">등급 한 단계 돌파</div>
+          <div class="hero-num hero-num-words">GRADE <span class="hero-num-accent">UP</span></div>
+          <div class="subtitle">등급 상승 <span class="small">· 이번 주</span></div>
+        </div>
+
+        <div class="bottom-row">
+          <span class="brand">고연승T<span class="sub">· Winning House</span></span>
+          <span class="serial">#KYS-04W3-GU</span>
+        </div>
+      </div>
+      <div class="card-caption">Card <strong>04</strong> · 등급 상승자 전용 한정 드롭</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ========= Detail Card ========= -->
+<section class="detail-wrap">
+  <div class="detail-label">02 · 상세 리포트 · 본인 · 학부모</div>
+
+  <article class="detail-card">
+    <header class="dc-head">
+      <div class="drop-label">WINNING HOUSE</div>
+      <div class="drop-num">04 · W3 · #0412</div>
+      <div class="dc-student">홍길동</div>
+      <div class="dc-student-sub">SUTO CLASS · RIDER</div>
+    </header>
+
+    <!-- ==== 3탭 스위처: 이번 주 / 업적 / 분석 ==== -->
+    <div class="tab-container">
+      <input type="radio" name="detail-tab" id="tab-week" checked>
+      <input type="radio" name="detail-tab" id="tab-badge">
+      <input type="radio" name="detail-tab" id="tab-analysis">
+      <input type="radio" name="detail-tab" id="tab-customize">
+
+      <div class="tab-switcher">
+        <label for="tab-week">이번 주<span class="tab-en">THIS WAVE</span></label>
+        <label for="tab-badge">업적<span class="tab-en">BADGES</span></label>
+        <label for="tab-analysis">분석<span class="tab-en">ANALYSIS</span></label>
+        <label for="tab-customize">꾸미기<span class="tab-en">DRESS UP</span></label>
+      </div>
+
+      <div class="tab-panes">
+
+      <!-- ───── [이번 주] 탭 ───── -->
+      <div class="tab-pane tab-pane-week">
+    <section class="block">
+      <div class="block-title-row">
+        <div class="block-title">성취 <span class="gold">/ THIS WAVE</span></div>
+        <div class="block-code">01</div>
+      </div>
+      <div class="block-sub">이번 파도에서 당신이 해낸 일</div>
+
+      <!-- 큰 가로 히어로 (파도 위 서핑) — viewBox 상단 확장 (-50) 으로 말풍선 공간 확보 -->
+      <div class="detail-hero">
+        <svg viewBox="0 -50 400 300" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="waveD" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#8E6F32" stop-opacity="0.25"/>
+              <stop offset="60%" stop-color="#D4A85E" stop-opacity="0.9"/>
+              <stop offset="100%" stop-color="#F3D180" stop-opacity="1"/>
+            </linearGradient>
+            <radialGradient id="spotD2" cx="80%" cy="30%" r="30%">
+              <stop offset="0%" stop-color="#F3D180" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#F3D180" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="bubble-shadow" x="-10%" y="-30%" width="120%" height="180%">
+              <feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-opacity="0.32" flood-color="#000000"/>
+            </filter>
+          </defs>
+
+          <ellipse cx="320" cy="80" rx="110" ry="85" fill="url(#spotD2)"/>
+
+          <!-- 파도 (왼→오 상승) -->
+          <path d="M 0,180 Q 100,170 160,150 T 280,105 Q 340,80 400,55"
+                stroke="url(#waveD)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+          <!-- 물 채움 -->
+          <path d="M 0,180 Q 100,170 160,150 T 280,105 Q 340,80 400,55 L 400,250 L 0,250 Z"
+                fill="#0A1628" opacity="0.7"/>
+          <path d="M 0,195 Q 90,185 170,170 T 300,130 T 400,90 L 400,250 L 0,250 Z"
+                fill="#060E1D" opacity="0.9"/>
+
+          <!-- 파도 뒤 회색 오리 무더기 (제낀 라이더 7명) — 메인 오리 왼쪽 뒤에 쌓여있음 -->
+          <g>
+            <!-- 7. 가장 뒤 -->
+            <g transform="translate(160,158)"><g class="fallen" opacity="0.42">
+              <ellipse cx="0" cy="0" rx="6.5" ry="4.5" fill="#4E5868"/>
+              <circle cx="3.5" cy="-4.5" r="3.5" fill="#4E5868"/>
+              <ellipse cx="7" cy="-4.5" rx="2.3" ry="0.85" fill="#3E4759"/>
+              <circle cx="4" cy="-5.5" r="0.6" fill="#0A1628"/>
+            </g></g>
+            <!-- 6. 뒤 왼쪽 -->
+            <g transform="translate(190,145)"><g class="fallen" opacity="0.48">
+              <ellipse cx="0" cy="0" rx="7.5" ry="5.3" fill="#4E5868"/>
+              <circle cx="4" cy="-5.3" r="4" fill="#4E5868"/>
+              <ellipse cx="7.8" cy="-5.3" rx="2.6" ry="0.95" fill="#3E4759"/>
+              <circle cx="5" cy="-6.3" r="0.7" fill="#0A1628"/>
+            </g></g>
+            <!-- 5. 중앙 -->
+            <g transform="translate(218,130)"><g class="fallen" opacity="0.52">
+              <ellipse cx="0" cy="0" rx="8" ry="5.8" fill="#4E5868"/>
+              <circle cx="4.5" cy="-5.8" r="4.2" fill="#4E5868"/>
+              <ellipse cx="8.3" cy="-5.8" rx="2.8" ry="1" fill="#3E4759"/>
+              <circle cx="5.5" cy="-6.8" r="0.75" fill="#0A1628"/>
+            </g></g>
+            <!-- 4. 중앙 뒤 살짝 뜬 -->
+            <g transform="translate(205,112)"><g class="fallen" opacity="0.5">
+              <ellipse cx="0" cy="0" rx="7.2" ry="5" fill="#4E5868"/>
+              <circle cx="4" cy="-5.3" r="3.7" fill="#4E5868"/>
+              <ellipse cx="7.5" cy="-5.3" rx="2.5" ry="0.9" fill="#3E4759"/>
+              <circle cx="5" cy="-6.2" r="0.65" fill="#0A1628"/>
+            </g></g>
+            <!-- 3. 메인 오리 근처 -->
+            <g transform="translate(250,108)"><g class="fallen" opacity="0.58">
+              <ellipse cx="0" cy="0" rx="8" ry="5.5" fill="#4E5868"/>
+              <circle cx="4.5" cy="-5.8" r="4" fill="#4E5868"/>
+              <ellipse cx="8.3" cy="-5.8" rx="2.8" ry="1" fill="#3E4759"/>
+              <circle cx="5.5" cy="-6.8" r="0.75" fill="#0A1628"/>
+            </g></g>
+            <!-- 2. 앞쪽 -->
+            <g transform="translate(278,95)"><g class="fallen" opacity="0.6">
+              <ellipse cx="0" cy="0" rx="7.8" ry="5.3" fill="#4E5868"/>
+              <circle cx="4.3" cy="-5.6" r="3.9" fill="#4E5868"/>
+              <ellipse cx="8" cy="-5.6" rx="2.7" ry="0.95" fill="#3E4759"/>
+              <circle cx="5.3" cy="-6.5" r="0.7" fill="#0A1628"/>
+            </g></g>
+            <!-- 1. 앞쪽 낮은 무더기 -->
+            <g transform="translate(240,148)"><g class="fallen" opacity="0.55">
+              <ellipse cx="0" cy="0" rx="7" ry="5" fill="#4E5868"/>
+              <circle cx="4" cy="-5.3" r="3.7" fill="#4E5868"/>
+              <ellipse cx="7.5" cy="-5.3" rx="2.5" ry="0.9" fill="#3E4759"/>
+              <circle cx="5" cy="-6.2" r="0.65" fill="#0A1628"/>
+            </g></g>
+          </g>
+
+          <!-- 물 버블 -->
+          <circle class="trail" cx="120" cy="185" r="1.5" fill="#F3D180" opacity="0"/>
+          <circle class="trail" cx="200" cy="165" r="1.2" fill="#F3D180" opacity="0"/>
+          <circle class="trail" cx="260" cy="140" r="1.5" fill="#F3D180" opacity="0"/>
+
+          <!-- 파도 꼭대기 서퍼 -->
+          <g transform="translate(320,55)"><g class="runner">
+            <g class="duck-slot duck-slot-ride" data-slot-name="ride" data-slot-scale="1.08"></g>
+            <g class="runner-body">
+              <!-- 꼬리 -->
+              <path d="M -14,2 L -18,-2 L -12,7 Z" fill="#D4A85E"/>
+              <!-- 몸통 (통통) -->
+              <ellipse cx="0" cy="5" rx="14" ry="13" fill="#F3D180"/>
+              <!-- 배 -->
+              <ellipse cx="0" cy="10" rx="8.5" ry="7" fill="#FFF4D6"/>
+              <g class="duck-slot duck-slot-body" data-slot-name="body" data-slot-scale="1.4"></g>
+              <!-- 날개 -->
+              <ellipse cx="-5" cy="4" rx="5.5" ry="7.5" fill="#D4A85E"/>
+              <!-- 머리 -->
+              <circle cx="1" cy="-11" r="9.5" fill="#F3D180"/>
+              <g class="duck-slot duck-slot-head" data-slot-name="head" data-slot-scale="1.4"></g>
+              <g class="duck-slot duck-slot-extra" data-slot-name="extra" data-slot-scale="1.4"></g>
+              <!-- 부리 위 -->
+              <ellipse cx="10" cy="-10" rx="5.5" ry="2" fill="#E85D4A"/>
+              <!-- 부리 아래 -->
+              <ellipse cx="9.8" cy="-8.2" rx="4.7" ry="1.5" fill="#C03B28"/>
+              <!-- 눈 -->
+              <circle cx="5" cy="-13" r="2.1" fill="#0A1628"/>
+              <circle cx="5.7" cy="-13.7" r="0.8" fill="#F5F1E8"/>
+              <!-- 볼 홍조 -->
+              <circle cx="-2" cy="-8" r="2" fill="#FFB3A0" opacity="0.6"/>
+              <g class="duck-slot duck-slot-feet" data-slot-name="feet" data-slot-scale="1.4"></g>
+            </g>
+          </g></g>
+
+          <!-- ==== 오리 말풍선: Chill / Ride your own waves (Finito 브랜드 철학) ==== -->
+          <!-- 상단 확장 공간(-50~0)에 배치, 꼬리가 아래로 오리 머리 향함 -->
+          <g class="speech-bubble" filter="url(#bubble-shadow)">
+            <path d="M 200,-42 Q 194,-42 194,-36 L 194,-8 Q 194,-2 200,-2 L 310,-2 L 320,10 L 330,-2 L 354,-2 Q 360,-2 360,-8 L 360,-36 Q 360,-42 354,-42 Z"
+                  fill="#F5F1E8" stroke="#D4A85E" stroke-width="1.3"/>
+            <text x="277" y="-26" text-anchor="middle"
+                  font-family="Pretendard Variable, Pretendard, sans-serif"
+                  font-weight="900" font-size="12.5" fill="#8E6F32"
+                  letter-spacing="0.24em">CHILL.</text>
+            <text x="277" y="-12" text-anchor="middle"
+                  font-family="Pretendard Variable, Pretendard, sans-serif"
+                  font-weight="600" font-size="10.5" fill="#0A1628"
+                  letter-spacing="0.01em">Ride your own waves.</text>
+          </g>
+
+          <!-- 라벨 -->
+          <text x="20" y="30" fill="#9FA6B6" font-family="Anton" font-size="12" letter-spacing="0.2em">RIDER</text>
+          <text x="380" y="235" text-anchor="end" fill="#F3D180" font-family="Anton" font-size="13" letter-spacing="0.15em">CREST</text>
+        </svg>
+      </div>
+
+      <p class="dc-caption">
+        이번 파도에서 <span class="accent">크레스트까지 올라왔어요</span>.<br>
+        당신이 지나온 자리에 <span class="coral">7명</span>이 남아있습니다.
+      </p>
+
+      <!-- 제낀 사람 4블록 -->
+      <div class="push-grid">
+        <div class="push-item positive">
+          <div class="pi-label">이번 파도 제친</div>
+          <div class="pi-value">7<span class="unit">명</span></div>
+          <div class="pi-caption">당신이 앞지른 라이더</div>
+        </div>
+        <div class="push-item negative">
+          <div class="pi-label">앞서간 라이더</div>
+          <div class="pi-value">3<span class="unit">명</span></div>
+          <div class="pi-caption">당신을 추월한 라이더</div>
+        </div>
+        <div class="push-item">
+          <div class="pi-label">통산 누적</div>
+          <div class="pi-value">500<span class="unit">명</span></div>
+          <div class="pi-caption">이번 주 신기록 달성</div>
+        </div>
+        <div class="push-item">
+          <div class="pi-label">연속 라이딩</div>
+          <div class="pi-value">7<span class="unit">일</span></div>
+          <div class="pi-caption">이번 주 7/7 풀라이딩</div>
+        </div>
+      </div>
+
+      <!-- ==== 사회적 callout (Duolingo Friend Streak 차용) ==== -->
+      <div class="social-callout">
+        지난주 당신 앞에서 서핑하던 <span class="sc-accent">3명</span>을 이번 파도에서 제쳤어요.
+        그리고 지금 당신 뒤에는 <span class="sc-accent">7명</span>이 따라오는 중.
+      </div>
+
+      <!-- 멘토 한마디 (이번 주 탭으로 이동) -->
+      <div class="mentor">
+        <p class="mentor-body">빈칸 접속사 패턴을 스스로 잡기 시작했어요. 이번 주는 순서배열 연결고리 3가지만 체화해봅시다.</p>
+        <div class="mentor-sign">— 고연승</div>
+      </div>
+    </section>
+      </div><!-- /tab-pane-week -->
+
+      <!-- ───── [업적] 탭 ───── -->
+      <div class="tab-pane tab-pane-badge">
+    <section class="block">
+      <div class="block-title-row">
+        <div class="block-title">업적 <span class="gold">/ BADGES</span></div>
+        <div class="block-code">02 · 2 / 5</div>
+      </div>
+      <div class="block-sub">받으면 자랑 가능한 한정 배지</div>
+
+      <!-- ==== 클럽 스탬프 (Duolingo Streak Society 차용) ==== -->
+      <div class="club-stamp">
+        <div>
+          <div class="cs-label">WAVE CLUB</div>
+          <div class="cs-name">SHARK RIDER IN TRAINING</div>
+        </div>
+        <div class="cs-count">
+          획득 <strong>2</strong> / 5
+        </div>
+      </div>
+
+      <div class="seal-list">
+        <!-- 1. 한달 서프 — earned -->
+        <div class="seal-row earned">
+          <div class="seal-circle earned">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M 17,4 Q 6,9 9,16 Q 13,23 22,18 Q 15,18 13,12 Q 14,6 17,4 Z" fill="#F3D180"/>
+            </svg>
+          </div>
+          <div>
+            <div class="seal-name">첫 달 라이딩</div>
+            <div class="seal-desc">4주 연속 시험 응시 달성</div>
+          </div>
+          <div class="seal-progress">획득</div>
+        </div>
+
+        <!-- 2. 크레스트 돌파 — earned -->
+        <div class="seal-row earned">
+          <div class="seal-circle earned">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M 3,18 Q 8,10 12,14 Q 16,18 21,6" stroke="#F3D180" stroke-width="2" stroke-linecap="round" fill="none"/>
+              <path d="M 16,6 L 21,6 L 21,11" stroke="#F3D180" stroke-width="2" stroke-linecap="round" fill="none"/>
+            </svg>
+          </div>
+          <div>
+            <div class="seal-name">크레스트 돌파</div>
+            <div class="seal-desc">등급 한 단계 상승 (첫 승급)</div>
+          </div>
+          <div class="seal-progress">획득</div>
+        </div>
+
+        <!-- 3. 상어조련사 — locked -->
+        <div class="seal-row">
+          <div class="seal-circle">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M 2,14 Q 6,8 16,10 L 20,6 L 18,12 L 22,13 Q 20,16 14,16 Q 8,18 2,14 Z"
+                    stroke="#6B7A8F" stroke-width="1.5" fill="none"/>
+              <path d="M 12,10 L 13,6 L 15,9 Z" stroke="#6B7A8F" stroke-width="1.5" fill="none"/>
+            </svg>
+          </div>
+          <div>
+            <div class="seal-name">상어 라이더</div>
+            <div class="seal-desc">한 회차 50명 이상 제치기</div>
+          </div>
+          <div class="seal-progress">7 / 50</div>
+        </div>
+
+        <!-- 4. 30일 롱 웨이브 — locked (물방울 아이콘) -->
+        <div class="seal-row">
+          <div class="seal-circle">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M 12,3 Q 6,11 7,16 Q 8,21 12,21 Q 16,21 17,16 Q 18,11 12,3 Z"
+                    stroke="#6B7A8F" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+              <circle cx="10" cy="14" r="1.2" fill="#6B7A8F" opacity="0.6"/>
+            </svg>
+          </div>
+          <div>
+            <div class="seal-name">30일 롱 웨이브</div>
+            <div class="seal-desc">30일 연속 시험 응시 달성</div>
+          </div>
+          <div class="seal-progress">7 / 30</div>
+        </div>
+
+        <!-- 5. 무덤의 귀환 — locked -->
+        <div class="seal-row">
+          <div class="seal-circle">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M 12,20 L 12,4 M 6,10 L 12,4 L 18,10"
+                    stroke="#6B7A8F" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M 4,21 L 20,21" stroke="#6B7A8F" stroke-width="1" stroke-dasharray="2,2"/>
+            </svg>
+          </div>
+          <div>
+            <div class="seal-name">리턴 라이더</div>
+            <div class="seal-desc">하락 후 원래 등급 복귀</div>
+          </div>
+          <div class="seal-progress">LOCK</div>
+        </div>
+      </div>
+    </section>
+      </div><!-- /tab-pane-badge -->
+
+      <!-- ───── [분석] 탭 ───── -->
+      <div class="tab-pane tab-pane-analysis">
+    <section class="block">
+      <div class="block-title-row">
+        <div class="block-title">분석 <span class="gold">/ ANALYSIS</span></div>
+        <div class="block-code">03</div>
+      </div>
+      <div class="block-sub">지금 당신의 위치와 다음 파도 (학부모용 객관 지표)</div>
+
+      <div class="analysis-row">
+        <div>
+          <div class="ar-label">이번 등급</div>
+          <div class="ar-main">3등급 <span class="chg">4 → 3</span></div>
+        </div>
+      </div>
+      <div class="analysis-row">
+        <div>
+          <div class="ar-label">가장 성장한 유형</div>
+          <div class="ar-main">빈칸추론 <span class="chg">40 → 70%</span></div>
+        </div>
+      </div>
+      <div class="analysis-row weak">
+        <div>
+          <div class="ar-label">다음 파도의 변수</div>
+          <div class="ar-main">순서배열 <span class="chg" style="color:var(--coral)">42%</span></div>
+        </div>
+        <a class="ar-cta" href="#">학습 →</a>
+      </div>
+
+      <div class="cohort-card">
+        <div class="cc-label">YOUR COHORT</div>
+        <p class="cc-body">
+          당신과 비슷한 점수대 <strong>38명</strong> 중 지난 6월 모의에서
+          <strong>1등급</strong> 4명 · <strong>2등급</strong> 14명 · <strong>3등급</strong> 15명이 나왔어요.
+          3주 뒤 당신은 어디쯤?
+        </p>
+      </div>
+
+    </section>
+      </div><!-- /tab-pane-analysis -->
+
+      <!-- ───── [꾸미기] 탭 ───── -->
+      <div class="tab-pane tab-pane-customize">
+    <section class="block customize-block">
+      <div class="block-title-row">
+        <div class="block-title">꾸미기 <span class="gold">/ DRESS UP</span></div>
+        <div class="block-code" data-total-progress>04 · 0 / 70</div>
+      </div>
+      <div class="block-sub">서핑 오리 코스모틱 컬렉션 · 점수 효과 없음</div>
+
+      <div class="dressup-note">COSMETIC ONLY · 학습 성능 영향 없음</div>
+
+      <div class="customize-shell">
+        <div class="customize-top">
+          <div class="customize-preview-card">
+            <div class="customize-preview-stage">
+              <svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                  <linearGradient id="dressupWave" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#8E6F32" stop-opacity="0.3"/>
+                    <stop offset="60%" stop-color="#D4A85E" stop-opacity="0.95"/>
+                    <stop offset="100%" stop-color="#F3D180" stop-opacity="1"/>
+                  </linearGradient>
+                </defs>
+                <path d="M 0,126 Q 64,120 112,104 T 192,78 Q 220,64 240,58"
+                      stroke="url(#dressupWave)" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <path d="M 0,126 Q 64,120 112,104 T 192,78 Q 220,64 240,58 L 240,180 L 0,180 Z"
+                      fill="#0A1628" opacity="0.78"/>
+                <path d="M 0,138 Q 62,132 118,118 T 200,94 T 240,76 L 240,180 L 0,180 Z"
+                      fill="#060E1D" opacity="0.9"/>
+                <circle cx="48" cy="124" r="2" fill="#F3D180" opacity="0.18"/>
+                <circle cx="74" cy="112" r="1.4" fill="#F3D180" opacity="0.22"/>
+                <circle cx="168" cy="88" r="1.5" fill="#F3D180" opacity="0.2"/>
+
+                <g transform="translate(150,84)"><g class="runner">
+                  <g class="duck-slot duck-slot-ride" data-slot-name="ride" data-slot-scale="1.02"></g>
+                  <g class="runner-body">
+                    <path d="M -13,2 L -18,-2 L -12,7 Z" fill="#D4A85E"/>
+                    <ellipse cx="0" cy="5" rx="13.2" ry="12.4" fill="#F3D180"/>
+                    <ellipse cx="0" cy="9.6" rx="8.2" ry="6.7" fill="#FFF4D6"/>
+                    <g class="duck-slot duck-slot-body" data-slot-name="body" data-slot-scale="1.28"></g>
+                    <ellipse cx="-5.2" cy="4" rx="5.2" ry="7" fill="#D4A85E"/>
+                    <circle cx="1" cy="-10.6" r="9.1" fill="#F3D180"/>
+                    <g class="duck-slot duck-slot-head" data-slot-name="head" data-slot-scale="1.32"></g>
+                    <g class="duck-slot duck-slot-extra" data-slot-name="extra" data-slot-scale="1.32"></g>
+                    <ellipse cx="9.5" cy="-9.1" rx="5.2" ry="1.9" fill="#E85D4A"/>
+                    <ellipse cx="9.2" cy="-7.4" rx="4.4" ry="1.35" fill="#C03B28"/>
+                    <circle cx="4.8" cy="-12.4" r="1.9" fill="#0A1628"/>
+                    <circle cx="5.4" cy="-13" r="0.7" fill="#F5F1E8"/>
+                    <circle cx="-1.8" cy="-7.8" r="1.8" fill="#FFB3A0" opacity="0.55"/>
+                    <g class="duck-slot duck-slot-feet" data-slot-name="feet" data-slot-scale="1.32"></g>
+                  </g>
+                </g></g>
+              </svg>
+            </div>
+
+            <div class="customize-preview-meta">
+              <div class="label">CURRENT LOADOUT</div>
+              <div class="set-name" data-set-name>크레스트 스타 세트</div>
+              <div class="set-note" data-set-note>선택한 5슬롯 조합이 공유 카드와 상세 히어로 오리에 즉시 반영됩니다.</div>
+            </div>
+          </div>
+
+          <div class="customize-slot-panel" data-slot-panel>
+            <button type="button" class="slot-chip is-active" data-slot="head">
+              <span class="ko">모자</span>
+              <span class="en">HEAD</span>
+            </button>
+            <button type="button" class="slot-chip" data-slot="body">
+              <span class="ko">상의</span>
+              <span class="en">BODY</span>
+            </button>
+            <button type="button" class="slot-chip" data-slot="feet">
+              <span class="ko">발</span>
+              <span class="en">FEET</span>
+            </button>
+            <button type="button" class="slot-chip" data-slot="ride">
+              <span class="ko">탈 것</span>
+              <span class="en">RIDE</span>
+            </button>
+            <button type="button" class="slot-chip" data-slot="extra">
+              <span class="ko">악세서리</span>
+              <span class="en">EXTRA</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="inventory-meta">
+          <strong data-current-slot-label>모자 인벤토리</strong>
+          <span data-slot-progress>0 / 14</span>
+        </div>
+
+        <div class="inventory-grid" data-inventory-grid></div>
+        <div class="inventory-help" data-save-status>변경 사항은 이 브라우저에 저장됩니다.</div>
+      </div>
+    </section>
+      </div><!-- /tab-pane-customize -->
+
+      </div><!-- /tab-panes -->
+    </div><!-- /tab-container -->
+
+    <!-- CTA -->
+    <section class="cta-block">
+      <div class="share-buttons">
+        <div class="share-btn"><span class="main">저장</span>이미지로</div>
+        <div class="share-btn"><span class="main">공유</span>단톡으로</div>
+        <div class="share-btn"><span class="main">공유</span>인스타 스토리</div>
+        <div class="share-btn"><span class="main">복사</span>링크</div>
+      </div>
+      <button class="winning-btn">위닝하우스에서 같은 파도 탄 친구와 얘기하기</button>
+    </section>
+  </article>
+</section>
+
+<footer class="footnote">
+  <h3>V3 변경 노트</h3>
+  <ul>
+    <li><strong>카드 다변화</strong>: Flex Card 1종 → 4종 (Personal Best · Streak · Milestone · Grade Up)</li>
+    <li><strong>등급 분리</strong>: Flex 4종 중 "Grade Up"만 등급 언급. 나머지는 누구나 자랑 가능한 메트릭</li>
+    <li><strong>한자 제거</strong>: 업적 심볼을 SVG 아이콘(달·체크·상어·번개·화살표)으로 재작성. 이름은 한국어</li>
+    <li><strong>파도 위 서핑 히어로</strong>: 가로 파도 곡선 + 꼭대기 서핑 라이더 + 물속 쓰러진 7명 구성</li>
+    <li><strong>V2 버그 수정</strong>: SVG viewBox·positioning 재조정, 히어로 padding 확보로 잘림 방지</li>
+    <li><strong>1:1 정사각</strong>: 인스타 피드·수만휘·디시 썸네일 최적. 스토리는 1:1 위에 패딩 전략</li>
+    <li><strong>애니메이션</strong>: 라이더 바운스·스웨이, 쓰러진 라이더 stagger, 불씨 flicker, 트레일 float, 현재 라벨 glow</li>
+    <li><strong>Detail Card 업적 리스트</strong>: 5종 세로 리스트 + 진행도(7/50, 7/30) 노출로 다음 목표 체감</li>
+  </ul>
+</footer>
+
+<script>
+(() => {
+  const STORAGE_KEY = "finito.duck.dressup.v1";
+  const SLOT_LABELS = {
+    head: "모자",
+    body: "상의",
+    feet: "발",
+    ride: "탈 것",
+    extra: "악세서리"
+  };
+  const SLOT_ORDER = ["head", "body", "feet", "ride", "extra"];
+
+  const SLOT_ITEMS = {
+    head: [
+      { id: "HN1", tier: "N", name: "맨머리 파도결", mission: "가입 즉시 기본 지급", asset: "none" },
+      { id: "HN2", tier: "N", name: "코랄 스타트 밴드", mission: "가입 즉시 기본 지급", asset: "band" },
+      { id: "HN3", tier: "N", name: "종이파도 바이저", mission: "가입 즉시 기본 지급", asset: "visor" },
+      { id: "HR1", tier: "R", name: "잔물결 선캡", mission: "첫 실전 응시 완료", asset: "suncap" },
+      { id: "HR2", tier: "R", name: "롱웨이브 버킷햇", mission: "2주 연속 응시", asset: "buckethat" },
+      { id: "HR3", tier: "R", name: "선셋 리본 캡", mission: "주간 숙제 100% 2회", asset: "ribboncap" },
+      { id: "HR4", tier: "R", name: "조개핀 스냅캡", mission: "4주 완주", asset: "snapcap" },
+      { id: "HE1", tier: "E", name: "크레스트 별핀", mission: "월간 등급 1단계 점프", asset: "star" },
+      { id: "HE2", tier: "E", name: "정박 앵커캡", mission: "월간 코호트 상위 20% 진입", asset: "anchorcap" },
+      { id: "HE3", tier: "E", name: "샤크핀 헬멧", mission: "한 회차 50명 이상 제치기", asset: "sharkfin" },
+      { id: "HL1", tier: "L", name: "퍼스트크라운 하프왕관", mission: "시즌 첫 1등급 진입", asset: "halfcrown" },
+      { id: "HL2", tier: "L", name: "제트웨이브 캡틴캡", mission: "3개월 스트릭 달성", asset: "captaincap" },
+      { id: "HL3", tier: "L", name: "북극성 파도관", mission: "시즌 코호트 1위 달성", asset: "crown" },
+      { id: "HM1", tier: "M", name: "새벽조류 오로라 크라운", mission: "1등급 4회 유지", asset: "auroracrown" }
+    ],
+    body: [
+      { id: "BN1", tier: "N", name: "모래사장 래시가드", mission: "가입 즉시 기본 지급", asset: "rashguard" },
+      { id: "BN2", tier: "N", name: "크림 파도 조끼", mission: "가입 즉시 기본 지급", asset: "vest" },
+      { id: "BN3", tier: "N", name: "홈룸 웻수트", mission: "가입 즉시 기본 지급", asset: "wetsuit" },
+      { id: "BR1", tier: "R", name: "리프 스트라이프 래시가드", mission: "첫 숙제 100% 완료", asset: "stripe" },
+      { id: "BR2", tier: "R", name: "비치클럽 후디조끼", mission: "1주 5/5 출석", asset: "hoodie" },
+      { id: "BR3", tier: "R", name: "서프노트 세일러탑", mission: "첫 오답노트 30문제 정리", asset: "sailor" },
+      { id: "BR4", tier: "R", name: "코호트 팀베스트", mission: "4회 연속 재응시", asset: "teamvest" },
+      { id: "BE1", tier: "E", name: "크레스트 스프린트 수트", mission: "월간 6회 응시", asset: "sprint" },
+      { id: "BE2", tier: "E", name: "문풀 투명 베스트", mission: "월간 오답복기 100문제", asset: "transparent" },
+      { id: "BE3", tier: "E", name: "파일럿 윈드브레이커", mission: "3회 연속 점수 상승", asset: "pilot" },
+      { id: "BE4", tier: "E", name: "딥블루 레이스 웻수트", mission: "유형 3개 이상 70% 돌파", asset: "deepblue" },
+      { id: "BL1", tier: "L", name: "골드타이드 캡틴코트", mission: "시즌 상위 10% 2회", asset: "captaincoat" },
+      { id: "BL2", tier: "L", name: "제트웨이브 스프레이 코트", mission: "시즌 100명 이상 제치기", asset: "spraycoat" },
+      { id: "BM1", tier: "M", name: "오로라 세일 로브", mission: "수능 D-100 달성", asset: "robe" }
+    ],
+    feet: [
+      { id: "FN1", tier: "N", name: "맨발 패들", mission: "가입 즉시 기본 지급", asset: "barefoot" },
+      { id: "FN2", tier: "N", name: "코랄 플립핀", mission: "가입 즉시 기본 지급", asset: "flipfin" },
+      { id: "FN3", tier: "N", name: "샌드스텝 아쿠아슈즈", mission: "가입 즉시 기본 지급", asset: "aquashoes" },
+      { id: "FR1", tier: "R", name: "리듬 레이스 핀", mission: "루틴 기록 7일 연속", asset: "lacefin" },
+      { id: "FR2", tier: "R", name: "스트릭 스플래시 핀", mission: "14일 연속 응시", asset: "splashfin" },
+      { id: "FR3", tier: "R", name: "클럽 덱슈즈", mission: "어휘 퀴즈 5일 연속 만점", asset: "deckshoes" },
+      { id: "FR4", tier: "R", name: "파도결 로프샌들", mission: "20일 내 4회 응시", asset: "ropesandal" },
+      { id: "FE1", tier: "E", name: "점프부스트 터보핀", mission: "월간 30명 이상 제치기", asset: "turbofin" },
+      { id: "FE2", tier: "E", name: "문글라이드 투명핀", mission: "듣기·어휘·빈칸 성장률 합계 +15%p", asset: "transparentfin" },
+      { id: "FE3", tier: "E", name: "리프러너 하이드로부츠", mission: "월간 21일 스트릭", asset: "hydroboot" },
+      { id: "FE4", tier: "E", name: "카누 킥오프 패들핀", mission: "월간 코호트 5위 이내", asset: "paddlefin" },
+      { id: "FL1", tier: "L", name: "골든웨이크 제트부츠", mission: "시즌 등급 2단계 점프", asset: "jetboot" },
+      { id: "FL2", tier: "L", name: "크레스트 항해장화", mission: "시즌 10회 이상 90분 풀타임 응시", asset: "captainboot" },
+      { id: "FM1", tier: "M", name: "돌핀테일 미스틱 핀", mission: "연간 30회 응시 + 100일 루틴", asset: "dolphintail" }
+    ],
+    ride: [
+      { id: "RN1", tier: "N", name: "베이직 쇼어보드", mission: "가입 즉시 기본 지급", asset: "boardBasic" },
+      { id: "RN2", tier: "N", name: "크림라인 쇼트보드", mission: "가입 즉시 기본 지급", asset: "boardCream" },
+      { id: "RN3", tier: "N", name: "샌드핀 연습보드", mission: "가입 즉시 기본 지급", asset: "boardSand" },
+      { id: "RR1", tier: "R", name: "롱웨이브 롱보드", mission: "첫 실전 응시 완료", asset: "longboard" },
+      { id: "RR2", tier: "R", name: "코랄 리프보드", mission: "2주 완주", asset: "reefboard" },
+      { id: "RR3", tier: "R", name: "블루커런트 글라이더", mission: "이번 파도 10명 이상 제치기", asset: "currentboard" },
+      { id: "RR4", tier: "R", name: "듀얼핀 미드보드", mission: "유형 정확도 60% 돌파", asset: "dualfin" },
+      { id: "RE1", tier: "E", name: "미러글래스 투명보드", mission: "월간 등급 1단계 상승", asset: "glassboard" },
+      { id: "RE2", tier: "E", name: "리버런 카약", mission: "월간 50명 이상 제치기", asset: "kayak" },
+      { id: "RE3", tier: "E", name: "크루패들 카누", mission: "월간 6회 연속 응시", asset: "canoe" },
+      { id: "RE4", tier: "E", name: "문베이 패들보드", mission: "월간 8회 응시", asset: "paddleboard" },
+      { id: "RL1", tier: "L", name: "골든타이드 모터보트", mission: "시즌 누적 150명 이상 제치기", asset: "motorboat" },
+      { id: "RL2", tier: "L", name: "제트웨이크 제트스키", mission: "시즌 상위 5% 2회 달성", asset: "jetski" },
+      { id: "RM1", tier: "M", name: "돌핀 에볼브 라이드", mission: "1등급 4회 유지 + 누적 300명 이상 제치기", asset: "dolphin" }
+    ],
+    extra: [
+      { id: "XN1", tier: "N", name: "입문 파도팔찌", mission: "가입 즉시 기본 지급", asset: "bracelet" },
+      { id: "XN2", tier: "N", name: "조개방울 키링", mission: "가입 즉시 기본 지급", asset: "keyring" },
+      { id: "XN3", tier: "N", name: "출석 배지핀", mission: "가입 즉시 기본 지급", asset: "badgepin" },
+      { id: "XR1", tier: "R", name: "물방울 이어링", mission: "첫 질문 인증 1회", asset: "waterdrop" },
+      { id: "XR2", tier: "R", name: "코럴 클럽 팔찌", mission: "3회 연속 과제 제출", asset: "clubbracelet" },
+      { id: "XR3", tier: "R", name: "파도일기 미니책", mission: "복습 기록 5일 연속", asset: "book" },
+      { id: "XR4", tier: "R", name: "로프 나침반 참", mission: "첫 목표설정 상담 완료", asset: "compass" },
+      { id: "XE1", tier: "E", name: "번개 이어커프", mission: "월간 10문제 연속 정답 5회", asset: "lightning" },
+      { id: "XE2", tier: "E", name: "샤크핀 머리장식", mission: "월간 2회 이상 30명 제치기", asset: "sharkfin" },
+      { id: "XE3", tier: "E", name: "앵커 메달", mission: "월간 코호트 상위 20% 2회", asset: "medal" },
+      { id: "XL1", tier: "L", name: "골드 오라 메달", mission: "시즌 클래스 MVP 투표 1위", asset: "auramedal" },
+      { id: "XL2", tier: "L", name: "캡틴 휘슬 참", mission: "시즌 풀참 12회 달성", asset: "whistle" },
+      { id: "XL3", tier: "L", name: "스타리프 후광핀", mission: "시즌 1등급 유지 2회", asset: "halopin" },
+      { id: "XM1", tier: "M", name: "오로라 파도 후광", mission: "연간 시즌 MVP 2회 달성", asset: "aurorahalo" }
+    ]
+  };
+
+  const ITEMS = Object.entries(SLOT_ITEMS).flatMap(([slot, items]) =>
+    items.map((item) => ({ ...item, slot }))
+  );
+  const ITEM_MAP = Object.fromEntries(ITEMS.map((item) => [item.id, item]));
+  const DEMO_UNLOCKED = new Set([
+    "HR1", "HR2", "HR3",
+    "BR1", "BR2",
+    "FR1", "FR4",
+    "RR1", "RR2", "RR3",
+    "XR1", "XR2",
+    "HE1", "BE1", "RE1", "XE1"
+  ]);
+
+  DEMO_UNLOCKED.forEach((id) => {
+    if (!ITEM_MAP[id]) console.warn(`[dressup] DEMO_UNLOCKED references unknown item: ${id}`);
+  });
+
+  const SLOT_ASSETS = {
+    head: {
+      none: "",
+      band: `<path d="M -5.6,-11.9 Q 0.9,-14.6 7.2,-12.2 L 6.8,-10.5 Q 0.9,-12.6 -5.1,-10.2 Z" fill="#E85D4A"/><path d="M -5.2,-11.0 Q 1.0,-13.1 6.6,-11.2" stroke="#D4A85E" stroke-width="0.55" fill="none" stroke-linecap="round"/>`,
+      visor: `<path d="M -6.8,-12.4 Q 1.0,-15.4 7.9,-12.2 L 6.8,-10.3 Q 0.8,-12.4 -5.7,-9.8 Z" fill="#F5F1E8" stroke="#D4A85E" stroke-width="0.6"/><path d="M -1.4,-12.9 H 3.4" stroke="#E85D4A" stroke-width="0.5"/>`,
+      suncap: `<path d="M -5.4,-13.2 Q 1.0,-16.7 6.5,-12.8 L 6.1,-9.8 Q 0.8,-12.7 -4.8,-10.1 Z" fill="#4A8BFF" stroke="#F5F1E8" stroke-width="0.6"/><path d="M 5.2,-11.1 Q 8.4,-10.8 9.6,-12.0" stroke="#4A8BFF" stroke-width="0.8" fill="none"/>`,
+      buckethat: `<path d="M -5.2,-16.0 Q 1,-18.6 6.6,-15.8 L 5.6,-11.5 Q 1.0,-13.0 -4.6,-11.6 Z" fill="#F5F1E8" stroke="#4A8BFF" stroke-width="0.6"/><path d="M -7.0,-11.9 Q 1.0,-13.8 8.3,-11.7" stroke="#4A8BFF" stroke-width="0.7" fill="none"/>`,
+      ribboncap: `<path d="M -5.2,-13.1 Q 1.0,-16.0 6.4,-12.4 L 6.0,-9.8 Q 0.8,-12.2 -4.8,-10.0 Z" fill="#F5F1E8" stroke="#E85D4A" stroke-width="0.6"/><path d="M 1.6,-15.2 L 3.4,-13.6 L 2.3,-11.8 L 0.6,-13.3 Z" fill="#E85D4A"/><path d="M 3.4,-13.6 L 5.0,-15.0 L 4.5,-12.9 Z" fill="#E85D4A"/>`,
+      snapcap: `<path d="M -5.0,-13.1 Q 1.0,-15.9 6.8,-12.6 L 6.0,-9.4 Q 0.9,-11.7 -4.5,-9.7 Z" fill="#4E5868" stroke="#F5F1E8" stroke-width="0.6"/><path d="M 6.0,-11.2 Q 8.6,-10.8 9.6,-11.8" stroke="#4E5868" stroke-width="0.8" fill="none"/><path d="M -5.9,-11.8 Q -5.1,-13.0 -4.0,-11.7 Q -5.0,-10.7 -5.9,-11.8 Z" fill="#F5F1E8"/>`,
+      star: `<path d="M -5.8,-13.4 L -4.9,-11.6 L -3.0,-11.3 L -4.4,-10.0 L -4.0,-8.1 L -5.8,-9.1 L -7.6,-8.1 L -7.2,-10.0 L -8.6,-11.3 L -6.7,-11.6 Z" fill="#E85D4A" stroke="#D4A85E" stroke-width="0.5" stroke-linejoin="round"/><circle cx="-5.8" cy="-10.8" r="0.45" fill="#F5F1E8"/>`,
+      anchorcap: `<path d="M -5.2,-13.4 Q 1.0,-16.6 6.8,-12.8 L 6.2,-9.7 Q 0.9,-12.2 -4.7,-10.0 Z" fill="#0A1628" stroke="#7B61FF" stroke-width="0.7"/><path d="M 0.8,-12.6 V -9.6" stroke="#F3D180" stroke-width="0.55"/><path d="M -0.8,-11.4 Q 0.8,-9.8 2.4,-11.4" stroke="#F3D180" stroke-width="0.55" fill="none"/><path d="M 0.8,-9.8 Q -0.3,-8.2 -1.6,-8.8 M 0.8,-9.8 Q 1.9,-8.2 3.2,-8.8" stroke="#F3D180" stroke-width="0.45" fill="none"/>`,
+      sharkfin: `<path d="M -4.1,-13.8 Q -1.8,-18.0 1.0,-15.5 Q 0.4,-13.5 -1.6,-12.8 Q -2.8,-12.5 -4.1,-13.8 Z" fill="#0A1628"/><path d="M -3.5,-14.0 Q -1.4,-15.0 0.2,-14.9" stroke="#F5F1E8" stroke-width="0.35" fill="none" stroke-linecap="round"/><path d="M -3.9,-13.2 Q -1.1,-13.9 1.1,-13.3" stroke="#D4A85E" stroke-width="0.45" fill="none" stroke-linecap="round"/>`,
+      halfcrown: `
+        <path d="M -3.5,-14.0 L -4.6,-17.5 L -1.2,-15.3 L 1.2,-18.2 L 3.8,-15.4 L 5.4,-17.2 L 5.2,-14.0 Z" fill="#F3D180" stroke="#FF9D2E" stroke-width="0.6"/>
+        <rect x="-3.5" y="-14" width="8.7" height="1.4" fill="#D4A85E"/>
+        <path d="M -3.5,-14.0 L -4.6,-17.5 L -1.2,-15.3 L 1.2,-18.2 L 3.8,-15.4 L 5.4,-17.2 L 5.2,-14.0 Z" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.6" stroke-linejoin="round"/>
+        <rect x="-3.7" y="-14.2" width="9.1" height="1.8" rx="0.35" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.6"/>
+        <circle cx="-4.9" cy="-17.7" r="1.45" fill="#F3D180" opacity="0.28"/>
+        <circle cx="1.1" cy="-19.8" r="1.75" fill="#F3D180" opacity="0.34"/>
+        <circle cx="-6.0" cy="-14.8" r="0.48" fill="#F5F1E8"/>
+        <circle cx="4.6" cy="-18.0" r="0.38" fill="#F5F1E8"/>
+        <circle cx="6.0" cy="-14.8" r="0.52" fill="#F5F1E8"/>
+      `,
+      captaincap: `
+        <path d="M -4.8,-14.5 Q 1.0,-17.2 6.2,-14.4 L 5.8,-11.4 Q 0.9,-13.2 -4.4,-11.5 Z" fill="#F3D180" stroke="#FF9D2E" stroke-width="0.7"/>
+        <rect x="-2.6" y="-13.3" width="5.4" height="1.5" rx="0.75" fill="#0A1628"/>
+        <circle cx="0.2" cy="-12.55" r="0.55" fill="#E85D4A"/>
+        <path d="M -4.8,-14.5 Q 1.0,-17.2 6.2,-14.4 L 5.8,-11.4 Q 0.9,-13.2 -4.4,-11.5 Z" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.6"/>
+        <rect x="-2.9" y="-13.55" width="6.0" height="2.0" rx="1.0" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.6"/>
+        <circle cx="-2.8" cy="-15.0" r="1.4" fill="#F3D180" opacity="0.26"/>
+        <circle cx="6.7" cy="-14.0" r="1.2" fill="#F3D180" opacity="0.32"/>
+        <circle cx="-4.0" cy="-12.8" r="0.46" fill="#F5F1E8"/>
+        <circle cx="0.2" cy="-11.7" r="0.38" fill="#F5F1E8"/>
+        <circle cx="7.3" cy="-12.0" r="0.52" fill="#F5F1E8"/>
+      `,
+      crown: `
+        <path d="M -5,-14 L -6,-19 L -2,-16 L 1,-20 L 4,-16 L 8,-19 L 7,-14 Z" fill="#F3D180" stroke="#D4A85E" stroke-width="0.6"/>
+        <rect x="-5" y="-14" width="12" height="1.8" fill="#D4A85E"/>
+        <circle cx="-6" cy="-19" r="0.7" fill="#E85D4A"/>
+        <circle cx="1" cy="-20" r="0.9" fill="#F5F1E8"/>
+        <circle cx="8" cy="-19" r="0.7" fill="#E85D4A"/>
+        <path d="M -5,-14 L -6,-19 L -2,-16 L 1,-20 L 4,-16 L 8,-19 L 7,-14 Z" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.6" stroke-linejoin="round"/>
+        <rect x="-5.3" y="-14.25" width="12.6" height="2.3" rx="0.35" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.6"/>
+        <circle cx="1.1" cy="-20.8" r="1.8" fill="#F3D180" opacity="0.36"/>
+        <circle cx="8.4" cy="-19.0" r="1.35" fill="#F3D180" opacity="0.24"/>
+        <circle cx="-6.8" cy="-16.1" r="0.5" fill="#F5F1E8"/>
+        <circle cx="0.8" cy="-13.0" r="0.42" fill="#F5F1E8"/>
+        <circle cx="8.7" cy="-15.8" r="0.55" fill="#F5F1E8"/>
+      `,
+      auroracrown: `
+        <path d="M -5.0,-14.2 L -6.0,-18.7 L -2.0,-15.9 L 1.0,-20.0 L 4.0,-15.8 L 7.8,-18.8 L 7.0,-14.2 Z" fill="none" stroke="#F3D180" stroke-width="0.8"/>
+        <path d="M -4.8,-16.0 Q -1.0,-18.4 2.4,-16.2 Q 5.2,-14.4 7.2,-16.5" stroke="#4A8BFF" stroke-width="0.8" fill="none" opacity="0.8"/>
+        <path d="M -4.4,-14.7 Q -0.4,-13.2 3.2,-14.4 Q 5.6,-15.2 7.1,-14.2" stroke="#7B61FF" stroke-width="0.8" fill="none" opacity="0.8"/>
+        <path d="M -5.0,-14.2 L -6.0,-18.7 L -2.0,-15.9 L 1.0,-20.0 L 4.0,-15.8 L 7.8,-18.8 L 7.0,-14.2 Z" fill="none" stroke="#F3D180" stroke-width="1.8" opacity="0.24" stroke-linejoin="round"/>
+        <path d="M -5.0,-14.2 L -6.0,-18.7 L -2.0,-15.9 L 1.0,-20.0 L 4.0,-15.8 L 7.8,-18.8 L 7.0,-14.2 Z" fill="none" stroke="#4A8BFF" stroke-width="1.15" opacity="0.42" stroke-linejoin="round"/>
+        <path d="M -5.0,-14.2 L -6.0,-18.7 L -2.0,-15.9 L 1.0,-20.0 L 4.0,-15.8 L 7.8,-18.8 L 7.0,-14.2 Z" fill="none" stroke="#7B61FF" stroke-width="0.65" opacity="0.75" stroke-linejoin="round"/>
+        <path d="M -7.8,-15.8 Q 1.0,-23.1 10.0,-15.7" stroke="#F3D180" stroke-width="1.2" fill="none" opacity="0.2" stroke-linecap="round"/>
+        <path d="M -6.4,-15.1 Q 1.0,-21.1 8.6,-15.0" stroke="#7B61FF" stroke-width="1.0" fill="none" opacity="0.45" stroke-linecap="round"/>
+        <path d="M -5.3,-13.5 Q 1.0,-11.1 7.4,-13.4" stroke="#F5F1E8" stroke-width="0.6" fill="none" opacity="0.3" stroke-linecap="round"/>
+        <circle cx="-7.2" cy="-18.0" r="0.55" fill="#F3D180" opacity="0.44"/>
+        <circle cx="-3.6" cy="-20.1" r="0.38" fill="#4A8BFF" opacity="0.36"/>
+        <circle cx="1.0" cy="-22.1" r="0.48" fill="#7B61FF" opacity="0.4"/>
+        <circle cx="6.9" cy="-19.4" r="0.42" fill="#F5F1E8" opacity="0.45"/>
+        <circle cx="9.3" cy="-17.1" r="0.36" fill="#E85D4A" opacity="0.38"/>
+      `
+    },
+    body: {
+      rashguard: `<path d="M -8,-0.8 Q 0,-3 8,-0.8 L 7.2,8.2 Q 0,10.3 -7.2,8.2 Z" fill="#F5F1E8" stroke="#D4A85E" stroke-width="0.7"/><path d="M -5,0.2 Q 0,-0.8 5,0.2" stroke="#D4A85E" stroke-width="0.5" fill="none"/>`,
+      vest: `<path d="M -7.8,-0.4 Q 0,-2.2 7.8,-0.4 L 6.4,7.5 Q 0,9.2 -6.4,7.5 Z" fill="#F3D180" stroke="#D4A85E" stroke-width="0.7"/><rect x="-1.2" y="1" width="2.4" height="5.2" rx="0.9" fill="#E85D4A" opacity="0.75"/>`,
+      wetsuit: `<path d="M -8.2,-0.8 Q 0,-3 8.2,-0.8 L 7.2,8 Q 0,10.3 -7.2,8 Z" fill="#0A1628" stroke="#D4A85E" stroke-width="0.7" opacity="0.9"/><path d="M 0,-1 L 0,7.4" stroke="#F3D180" stroke-width="0.8" stroke-linecap="round"/><path d="M -4.5,1.6 H 4.5" stroke="#F5F1E8" stroke-width="0.45" opacity="0.55"/>`,
+      stripe: `<path d="M -8,-0.8 Q 0,-3 8,-0.8 L 7.2,8.2 Q 0,10.3 -7.2,8.2 Z" fill="#F5F1E8" stroke="#4A8BFF" stroke-width="0.8"/><path d="M -5.8,0.8 H 5.8" stroke="#4A8BFF" stroke-width="0.5"/><path d="M -5.2,3 H 5.2" stroke="#4A8BFF" stroke-width="0.5"/><path d="M -4.2,5.2 H 4.2" stroke="#D4A85E" stroke-width="0.45"/>`,
+      hoodie: `<path d="M -8.4,-1.4 Q -5.2,-4.8 0,-4.8 Q 5.2,-4.8 8.4,-1.4 L 6.6,8 Q 0,10 -6.6,8 Z" fill="#4E5868" stroke="#4A8BFF" stroke-width="0.8"/><path d="M -3.4,-3.8 Q 0,-1.6 3.4,-3.8" stroke="#F5F1E8" stroke-width="0.55" fill="none"/><path d="M -1.6,-1.2 L -1.2,1.2" stroke="#F5F1E8" stroke-width="0.45"/><path d="M 1.6,-1.2 L 1.2,1.2" stroke="#F5F1E8" stroke-width="0.45"/>`,
+      sailor: `<path d="M -8,-0.4 Q 0,-2.6 8,-0.4 L 7,8.1 Q 0,10 -7,8.1 Z" fill="#F5F1E8" stroke="#D4A85E" stroke-width="0.7"/><path d="M -5.5,-0.6 L 0,2.2 L 5.5,-0.6" fill="none" stroke="#4A8BFF" stroke-width="0.75" stroke-linejoin="round"/><path d="M 0,2.2 L 0,6.6" stroke="#4A8BFF" stroke-width="0.55"/>`,
+      teamvest: `<path d="M -7.9,-0.6 Q 0,-2.5 7.9,-0.6 L 6.6,7.8 Q 0,9.8 -6.6,7.8 Z" fill="#4E5868" stroke="#4A8BFF" stroke-width="0.8"/><rect x="-5.9" y="0.4" width="2.2" height="6.2" rx="0.8" fill="#F5F1E8" opacity="0.55"/><rect x="3.7" y="0.4" width="2.2" height="6.2" rx="0.8" fill="#F5F1E8" opacity="0.55"/>`,
+      sprint: `<path d="M -8.2,-1 Q 0,-3.2 8.2,-1 L 7.1,8.2 Q 0,10.6 -7.1,8.2 Z" fill="#7B61FF" stroke="#F5F1E8" stroke-width="0.8"/><path d="M -6,1.2 L -1,4.6" stroke="#F5F1E8" stroke-width="0.7" stroke-linecap="round"/><path d="M 1,0.6 L 5.8,4.2" stroke="#F3D180" stroke-width="0.7" stroke-linecap="round"/>`,
+      transparent: `<path d="M -7.8,-0.4 Q 0,-2.5 7.8,-0.4 L 6.6,7.8 Q 0,9.6 -6.6,7.8 Z" fill="#F5F1E8" opacity="0.2" stroke="#7B61FF" stroke-width="0.8"/><path d="M -5.6,0.8 Q 0,-0.6 5.6,0.8" stroke="#F5F1E8" stroke-width="0.5" fill="none" opacity="0.75"/><path d="M -4,4.8 H 4" stroke="#7B61FF" stroke-width="0.6"/>`,
+      pilot: `<path d="M -8.4,-0.8 Q 0,-3.1 8.4,-0.8 L 7.2,7.8 Q 0,10.2 -7.2,7.8 Z" fill="#4E5868" stroke="#7B61FF" stroke-width="0.8"/><path d="M -3.2,-1.3 L 0,2.1 L 3.2,-1.3" fill="#F5F1E8" opacity="0.7"/><path d="M 0,0.6 L 0,6.9" stroke="#F3D180" stroke-width="0.8"/><path d="M -6.3,2.2 L -3.6,2.2" stroke="#F5F1E8" stroke-width="0.45"/>`,
+      deepblue: `<path d="M -8.2,-0.9 Q 0,-3.2 8.2,-0.9 L 7.0,8.1 Q 0,10.4 -7.0,8.1 Z" fill="#0A1628" stroke="#7B61FF" stroke-width="0.8"/><path d="M -5.6,0.4 L -2.2,7.2" stroke="#4A8BFF" stroke-width="0.6"/><path d="M 5.6,0.4 L 2.2,7.2" stroke="#4A8BFF" stroke-width="0.6"/>`,
+      captaincoat: `
+        <path d="M -8.4,-1.2 Q 0,-3.6 8.4,-1.2 L 8,9.4 Q 0,12 -8,9.4 Z" fill="#F3D180" stroke="#FF9D2E" stroke-width="0.9"/>
+        <path d="M -5.8,-0.6 V 8.4" stroke="#8E6F32" stroke-width="0.6"/>
+        <path d="M 5.8,-0.6 V 8.4" stroke="#8E6F32" stroke-width="0.6"/>
+        <circle cx="-2.2" cy="2.2" r="0.65" fill="#E85D4A"/>
+        <circle cx="2.2" cy="2.2" r="0.65" fill="#E85D4A"/>
+        <path d="M -8.4,-1.2 Q 0,-3.6 8.4,-1.2 L 8,9.4 Q 0,12 -8,9.4 Z" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.6"/>
+        <path d="M -6.8,-0.1 Q 0,-2.2 6.8,-0.1" stroke="#F3D180" stroke-width="0.4" opacity="0.55" fill="none" stroke-linecap="round"/>
+        <circle cx="-7.6" cy="-0.9" r="1.55" fill="#F3D180" opacity="0.28"/>
+        <circle cx="7.6" cy="-0.9" r="1.55" fill="#F3D180" opacity="0.28"/>
+        <circle cx="-4.4" cy="8.9" r="0.46" fill="#F5F1E8"/>
+        <circle cx="0.0" cy="1.1" r="0.4" fill="#F5F1E8"/>
+        <circle cx="4.5" cy="8.8" r="0.52" fill="#F5F1E8"/>
+      `,
+      spraycoat: `
+        <path d="M -8.5,-1.2 Q 0,-3.4 8.5,-1.2 L 8.2,9.2 Q 0,11.8 -8.2,9.2 Z" fill="#F3D180" stroke="#FF9D2E" stroke-width="0.9"/>
+        <path d="M -6.4,1.2 Q -2.4,-0.4 1.2,1.6 T 7.0,2.0" stroke="#E85D4A" stroke-width="0.7" fill="none"/>
+        <circle cx="-3.2" cy="5.2" r="0.8" fill="#F5F1E8" opacity="0.75"/>
+        <circle cx="2.6" cy="4.4" r="0.6" fill="#F5F1E8" opacity="0.75"/>
+        <path d="M -8.5,-1.2 Q 0,-3.4 8.5,-1.2 L 8.2,9.2 Q 0,11.8 -8.2,9.2 Z" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.6"/>
+        <path d="M -6.4,1.2 Q -2.4,-0.4 1.2,1.6 T 7.0,2.0" stroke="#F3D180" stroke-width="0.4" opacity="0.6" fill="none" stroke-linecap="round"/>
+        <circle cx="-6.6" cy="1.0" r="1.4" fill="#F3D180" opacity="0.26"/>
+        <circle cx="6.8" cy="2.4" r="1.5" fill="#F3D180" opacity="0.32"/>
+        <circle cx="-5.1" cy="6.8" r="0.44" fill="#F5F1E8"/>
+        <circle cx="0.6" cy="0.2" r="0.36" fill="#F5F1E8"/>
+        <circle cx="6.5" cy="5.5" r="0.52" fill="#F5F1E8"/>
+      `,
+      robe: `
+        <path d="M -8.8,-1.5 Q 0,-4 8.8,-1.5 L 9.4,10.5 Q 0,14 -9.4,10.5 Z" fill="#0A1628" stroke="#F3D180" stroke-width="0.9"/>
+        <path d="M -6.2,0.6 Q -1.2,-2.1 3.2,-0.8 Q 6.2,0.1 8.2,-1.2" stroke="#4A8BFF" stroke-width="0.7" fill="none"/>
+        <path d="M -6.6,3.2 Q -2.6,1.4 1.4,2.6 Q 4.8,3.7 8.4,1.8" stroke="#7B61FF" stroke-width="0.7" fill="none"/>
+        <path d="M -8.8,-1.5 Q 0,-4 8.8,-1.5 L 9.4,10.5 Q 0,14 -9.4,10.5 Z" fill="none" stroke="#F3D180" stroke-width="1.8" opacity="0.24" stroke-linejoin="round"/>
+        <path d="M -8.8,-1.5 Q 0,-4 8.8,-1.5 L 9.4,10.5 Q 0,14 -9.4,10.5 Z" fill="none" stroke="#4A8BFF" stroke-width="1.15" opacity="0.42" stroke-linejoin="round"/>
+        <path d="M -8.8,-1.5 Q 0,-4 8.8,-1.5 L 9.4,10.5 Q 0,14 -9.4,10.5 Z" fill="none" stroke="#7B61FF" stroke-width="0.7" opacity="0.78" stroke-linejoin="round"/>
+        <path d="M -10.4,-0.8 Q 0,-6.6 10.4,-0.8 Q 10.9,8.8 0,14.9 Q -10.9,8.8 -10.4,-0.8 Z" fill="none" stroke="#F3D180" stroke-width="1.2" opacity="0.2"/>
+        <path d="M -9.4,-0.8 Q 0,-5.4 9.4,-0.8 Q 9.8,8.1 0,13.6 Q -9.8,8.1 -9.4,-0.8 Z" fill="none" stroke="#7B61FF" stroke-width="1.0" opacity="0.45"/>
+        <path d="M -7.6,6.1 Q 0,8.9 7.6,5.9" stroke="#F5F1E8" stroke-width="0.6" fill="none" opacity="0.28" stroke-linecap="round"/>
+        <circle cx="-8.8" cy="-2.0" r="0.42" fill="#F3D180" opacity="0.38"/>
+        <circle cx="-6.2" cy="11.8" r="0.36" fill="#4A8BFF" opacity="0.34"/>
+        <circle cx="-1.5" cy="-3.4" r="0.48" fill="#7B61FF" opacity="0.42"/>
+        <circle cx="4.8" cy="-4.2" r="0.44" fill="#F5F1E8" opacity="0.45"/>
+        <circle cx="8.9" cy="1.5" r="0.38" fill="#E85D4A" opacity="0.36"/>
+        <circle cx="2.2" cy="12.8" r="0.46" fill="#F3D180" opacity="0.4"/>
+      `
+    },
+    feet: {
+      barefoot: `<path d="M -3,12 L -6,16 L -1,15 Z" fill="#E85D4A"/><path d="M 3,12 L 6,16 L 1,15 Z" fill="#E85D4A"/>`,
+      flipfin: `<path d="M -3.5,12 L -7.2,17 L -0.2,16 L -1.2,12.8 Z" fill="#E85D4A" stroke="#D4A85E" stroke-width="0.5"/><path d="M 3.5,12 L 7.2,17 L 0.2,16 L 1.2,12.8 Z" fill="#E85D4A" stroke="#D4A85E" stroke-width="0.5"/>`,
+      aquashoes: `<path d="M -5.4,12.5 Q -7.2,14.2 -6.8,16.5 L -1.2,16.2 Q -0.8,14.4 -2.2,12.6 Z" fill="#F5F1E8" stroke="#D4A85E" stroke-width="0.6"/><path d="M 5.4,12.5 Q 7.2,14.2 6.8,16.5 L 1.2,16.2 Q 0.8,14.4 2.2,12.6 Z" fill="#F5F1E8" stroke="#D4A85E" stroke-width="0.6"/>`,
+      lacefin: `<path d="M -3.5,12 L -7.4,16.9 L -0.8,16.1 L -1.4,13.1 Z" fill="#F5F1E8" stroke="#4A8BFF" stroke-width="0.7"/><path d="M 3.5,12 L 7.4,16.9 L 0.8,16.1 L 1.4,13.1 Z" fill="#F5F1E8" stroke="#4A8BFF" stroke-width="0.7"/><path d="M -5.8,13.6 L -2.2,15.4" stroke="#4A8BFF" stroke-width="0.5"/><path d="M 5.8,13.6 L 2.2,15.4" stroke="#4A8BFF" stroke-width="0.5"/>`,
+      splashfin: `<path d="M -3.6,12 L -8.2,17.2 L -0.8,16.1 L -1.6,12.9 Z" fill="#4A8BFF" stroke="#F5F1E8" stroke-width="0.6"/><path d="M 3.6,12 L 8.2,17.2 L 0.8,16.1 L 1.6,12.9 Z" fill="#4A8BFF" stroke="#F5F1E8" stroke-width="0.6"/><circle cx="-7.6" cy="13.2" r="0.8" fill="#4A8BFF" opacity="0.7"/><circle cx="7.6" cy="13.2" r="0.8" fill="#4A8BFF" opacity="0.7"/>`,
+      deckshoes: `<path d="M -5.8,12.6 Q -7.6,14.1 -6.7,16.6 L -0.8,16.4 Q -0.6,14.8 -2.3,12.8 Z" fill="#F5F1E8" stroke="#4A8BFF" stroke-width="0.6"/><path d="M 5.8,12.6 Q 7.6,14.1 6.7,16.6 L 0.8,16.4 Q 0.6,14.8 2.3,12.8 Z" fill="#F5F1E8" stroke="#4A8BFF" stroke-width="0.6"/><path d="M -5.5,14.3 H -1.6" stroke="#D4A85E" stroke-width="0.5"/><path d="M 5.5,14.3 H 1.6" stroke="#D4A85E" stroke-width="0.5"/>`,
+      ropesandal: `<path d="M -5.6,12.8 Q -7.3,14.2 -6.8,16.5 L -1.1,16.2 Q -0.7,14.8 -2.1,12.8 Z" fill="#F3D180" stroke="#8E6F32" stroke-width="0.6"/><path d="M 5.6,12.8 Q 7.3,14.2 6.8,16.5 L 1.1,16.2 Q 0.7,14.8 2.1,12.8 Z" fill="#F3D180" stroke="#8E6F32" stroke-width="0.6"/><path d="M -5.2,13.6 Q -3.8,14.4 -2.2,13.8" stroke="#E85D4A" stroke-width="0.55" fill="none"/><path d="M 5.2,13.6 Q 3.8,14.4 2.2,13.8" stroke="#E85D4A" stroke-width="0.55" fill="none"/>`,
+      turbofin: `<path d="M -3.5,11.8 L -8.5,17.8 L -0.8,16.0 L -0.9,13.2 Z" fill="#7B61FF" stroke="#F5F1E8" stroke-width="0.6"/><path d="M 3.5,11.8 L 8.5,17.8 L 0.8,16.0 L 0.9,13.2 Z" fill="#7B61FF" stroke="#F5F1E8" stroke-width="0.6"/><path d="M -8.4,15.8 L -10.2,15.0" stroke="#7B61FF" stroke-width="1" stroke-linecap="round"/><path d="M 8.4,15.8 L 10.2,15.0" stroke="#7B61FF" stroke-width="1" stroke-linecap="round"/>`,
+      transparentfin: `<path d="M -3.4,12 L -8.1,17.4 L -0.6,16.1 L -1.2,12.9 Z" fill="#F5F1E8" opacity="0.22" stroke="#7B61FF" stroke-width="0.8"/><path d="M 3.4,12 L 8.1,17.4 L 0.6,16.1 L 1.2,12.9 Z" fill="#F5F1E8" opacity="0.22" stroke="#7B61FF" stroke-width="0.8"/><path d="M -6.2,13.1 L -2.2,15.1" stroke="#F5F1E8" stroke-width="0.5" opacity="0.7"/><path d="M 6.2,13.1 L 2.2,15.1" stroke="#F5F1E8" stroke-width="0.5" opacity="0.7"/>`,
+      hydroboot: `<path d="M -5.4,10.9 L -7.1,11.2 L -6.8,16.8 L -0.5,16.6 L -0.3,12.2 Z" fill="#7B61FF" stroke="#D4A85E" stroke-width="0.7"/><path d="M 5.4,10.9 L 7.1,11.2 L 6.8,16.8 L 0.5,16.6 L 0.3,12.2 Z" fill="#7B61FF" stroke="#D4A85E" stroke-width="0.7"/><path d="M -5.7,12.5 H -1.2" stroke="#F5F1E8" stroke-width="0.45"/><path d="M 5.7,12.5 H 1.2" stroke="#F5F1E8" stroke-width="0.45"/>`,
+      paddlefin: `<path d="M -4.0,11.9 L -8.8,17.4 L -0.4,16.2 L -1.2,12.6 Z" fill="#7B61FF" stroke="#F3D180" stroke-width="0.7"/><path d="M 4.0,11.9 L 8.8,17.4 L 0.4,16.2 L 1.2,12.6 Z" fill="#7B61FF" stroke="#F3D180" stroke-width="0.7"/><path d="M -8.2,15.5 Q -9.8,16.0 -10.8,17.4" stroke="#F3D180" stroke-width="0.7" fill="none"/><path d="M 8.2,15.5 Q 9.8,16.0 10.8,17.4" stroke="#F3D180" stroke-width="0.7" fill="none"/>`,
+      jetboot: `
+        <path d="M -5.8,10.7 L -7.8,11.1 L -7.2,16.7 L -0.6,16.6 L -0.2,12.1 Z" fill="#F3D180" stroke="#FF9D2E" stroke-width="0.8"/>
+        <path d="M 5.8,10.7 L 7.8,11.1 L 7.2,16.7 L 0.6,16.6 L 0.2,12.1 Z" fill="#F3D180" stroke="#FF9D2E" stroke-width="0.8"/>
+        <path d="M -7.4,15.2 L -10.2,16.0" stroke="#F3D180" stroke-width="1.1" stroke-linecap="round"/>
+        <path d="M 7.4,15.2 L 10.2,16.0" stroke="#F3D180" stroke-width="1.1" stroke-linecap="round"/>
+        <path d="M -5.8,10.7 L -7.8,11.1 L -7.2,16.7 L -0.6,16.6 L -0.2,12.1 Z" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.6"/>
+        <path d="M 5.8,10.7 L 7.8,11.1 L 7.2,16.7 L 0.6,16.6 L 0.2,12.1 Z" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.6"/>
+        <path d="M -7.6,15.2 L -10.8,16.2" stroke="#F3D180" stroke-width="0.4" opacity="0.6" fill="none" stroke-linecap="round"/>
+        <path d="M 7.6,15.2 L 10.8,16.2" stroke="#F3D180" stroke-width="0.4" opacity="0.6" fill="none" stroke-linecap="round"/>
+        <circle cx="-10.4" cy="16.1" r="1.35" fill="#F3D180" opacity="0.3"/>
+        <circle cx="10.4" cy="16.1" r="1.35" fill="#F3D180" opacity="0.3"/>
+        <circle cx="-7.5" cy="11.2" r="0.42" fill="#F5F1E8"/>
+        <circle cx="0.0" cy="16.9" r="0.36" fill="#F5F1E8"/>
+        <circle cx="7.5" cy="11.2" r="0.52" fill="#F5F1E8"/>
+      `,
+      captainboot: `
+        <path d="M -5.9,10.8 L -8.1,11.1 L -7.4,16.8 L -0.7,16.7 L -0.2,12.0 Z" fill="#F3D180" stroke="#8E6F32" stroke-width="0.8"/>
+        <path d="M 5.9,10.8 L 8.1,11.1 L 7.4,16.8 L 0.7,16.7 L 0.2,12.0 Z" fill="#F3D180" stroke="#8E6F32" stroke-width="0.8"/>
+        <circle cx="-4.2" cy="12.5" r="0.55" fill="#E85D4A"/>
+        <circle cx="4.2" cy="12.5" r="0.55" fill="#E85D4A"/>
+        <path d="M -5.9,10.8 L -8.1,11.1 L -7.4,16.8 L -0.7,16.7 L -0.2,12.0 Z" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.6"/>
+        <path d="M 5.9,10.8 L 8.1,11.1 L 7.4,16.8 L 0.7,16.7 L 0.2,12.0 Z" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.6"/>
+        <circle cx="-4.8" cy="11.8" r="1.25" fill="#F3D180" opacity="0.26"/>
+        <circle cx="4.8" cy="11.8" r="1.25" fill="#F3D180" opacity="0.26"/>
+        <circle cx="-6.9" cy="15.8" r="0.44" fill="#F5F1E8"/>
+        <circle cx="0.0" cy="12.2" r="0.36" fill="#F5F1E8"/>
+        <circle cx="6.9" cy="15.8" r="0.52" fill="#F5F1E8"/>
+      `,
+      dolphintail: `
+        <path d="M -3.2,12.2 Q -8.8,15.0 -8.2,18.4 Q -4.8,18.2 -1.4,16.0 Q -0.2,18.4 2.2,19.4 Q 3.2,16.9 2.6,14.3 Z" fill="#4E5868" stroke="#F3D180" stroke-width="0.7"/>
+        <path d="M 3.2,12.2 Q 8.8,15.0 8.2,18.4 Q 4.8,18.2 1.4,16.0 Q 0.2,18.4 -2.2,19.4 Q -3.2,16.9 -2.6,14.3 Z" fill="#4E5868" stroke="#F3D180" stroke-width="0.7"/>
+        <path d="M -3.2,12.2 Q -8.8,15.0 -8.2,18.4 Q -4.8,18.2 -1.4,16.0 Q -0.2,18.4 2.2,19.4 Q 3.2,16.9 2.6,14.3 Z" fill="none" stroke="#F3D180" stroke-width="1.6" opacity="0.24" stroke-linejoin="round"/>
+        <path d="M -3.2,12.2 Q -8.8,15.0 -8.2,18.4 Q -4.8,18.2 -1.4,16.0 Q -0.2,18.4 2.2,19.4 Q 3.2,16.9 2.6,14.3 Z" fill="none" stroke="#4A8BFF" stroke-width="1.05" opacity="0.42" stroke-linejoin="round"/>
+        <path d="M -3.2,12.2 Q -8.8,15.0 -8.2,18.4 Q -4.8,18.2 -1.4,16.0 Q -0.2,18.4 2.2,19.4 Q 3.2,16.9 2.6,14.3 Z" fill="none" stroke="#7B61FF" stroke-width="0.6" opacity="0.78" stroke-linejoin="round"/>
+        <path d="M 3.2,12.2 Q 8.8,15.0 8.2,18.4 Q 4.8,18.2 1.4,16.0 Q 0.2,18.4 -2.2,19.4 Q -3.2,16.9 -2.6,14.3 Z" fill="none" stroke="#F3D180" stroke-width="1.6" opacity="0.24" stroke-linejoin="round"/>
+        <path d="M 3.2,12.2 Q 8.8,15.0 8.2,18.4 Q 4.8,18.2 1.4,16.0 Q 0.2,18.4 -2.2,19.4 Q -3.2,16.9 -2.6,14.3 Z" fill="none" stroke="#4A8BFF" stroke-width="1.05" opacity="0.42" stroke-linejoin="round"/>
+        <path d="M 3.2,12.2 Q 8.8,15.0 8.2,18.4 Q 4.8,18.2 1.4,16.0 Q 0.2,18.4 -2.2,19.4 Q -3.2,16.9 -2.6,14.3 Z" fill="none" stroke="#7B61FF" stroke-width="0.6" opacity="0.78" stroke-linejoin="round"/>
+        <path d="M -10.4,13.2 Q 0,8.7 10.4,13.2 Q 8.8,21.1 0,22.5 Q -8.8,21.1 -10.4,13.2 Z" fill="none" stroke="#F3D180" stroke-width="1.2" opacity="0.2"/>
+        <path d="M -9.0,13.5 Q 0,9.8 9.0,13.5 Q 7.8,20.2 0,21.3 Q -7.8,20.2 -9.0,13.5 Z" fill="none" stroke="#7B61FF" stroke-width="1.0" opacity="0.45"/>
+        <path d="M -7.0,12.0 Q 0,9.8 7.0,12.0" stroke="#F5F1E8" stroke-width="0.6" fill="none" opacity="0.28" stroke-linecap="round"/>
+        <circle cx="-9.2" cy="16.0" r="0.42" fill="#F3D180" opacity="0.38"/>
+        <circle cx="-4.4" cy="19.2" r="0.34" fill="#4A8BFF" opacity="0.36"/>
+        <circle cx="0.0" cy="21.0" r="0.48" fill="#7B61FF" opacity="0.42"/>
+        <circle cx="4.4" cy="19.2" r="0.4" fill="#F5F1E8" opacity="0.44"/>
+        <circle cx="9.2" cy="16.0" r="0.36" fill="#E85D4A" opacity="0.34"/>
+      `
+    },
+    ride: {
+      boardBasic: `<ellipse cx="0" cy="22" rx="22" ry="3.2" fill="#D4A85E"/><ellipse cx="0" cy="23" rx="18" ry="1.4" fill="#0A1628" opacity="0.35"/><path d="M -8,22 L -6,26 L -4,22 Z" fill="#8E6F32"/><path d="M 4,22 L 6,26 L 8,22 Z" fill="#8E6F32"/>`,
+      boardCream: `<ellipse cx="0" cy="22" rx="21" ry="3" fill="#F5F1E8" stroke="#D4A85E" stroke-width="0.8"/><path d="M -12,22 Q 0,19.8 12,22" stroke="#E85D4A" stroke-width="0.8" fill="none" stroke-linecap="round"/><ellipse cx="0" cy="23" rx="15" ry="1.2" fill="#0A1628" opacity="0.25"/><path d="M 0,20.2 L 1.5,22.2 L -1.5,22.2 Z" fill="#D4A85E"/>`,
+      boardSand: `<ellipse cx="0" cy="22" rx="21" ry="3.1" fill="#F3D180" stroke="#8E6F32" stroke-width="0.8"/><path d="M -10,22 Q -4,20.5 2,22 T 12,22" stroke="#F5F1E8" stroke-width="0.7" fill="none"/><path d="M -7,22 L -5,25.6 L -3,22 Z" fill="#8E6F32"/><path d="M 3,22 L 5,25.6 L 7,22 Z" fill="#8E6F32"/>`,
+      longboard: `<ellipse cx="0" cy="22" rx="26" ry="3.1" fill="#F5F1E8" stroke="#4A8BFF" stroke-width="1"/><path d="M -18,22 Q -4,18.8 10,22" stroke="#4A8BFF" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M -8,22 L -5,26 L -2,22 Z" fill="#4A8BFF"/><path d="M 2,22 L 5,26 L 8,22 Z" fill="#4A8BFF"/><ellipse cx="0" cy="23.1" rx="19" ry="1.3" fill="#0A1628" opacity="0.22"/>`,
+      reefboard: `<ellipse cx="0" cy="22" rx="23" ry="3.2" fill="#F5F1E8" stroke="#D4A85E" stroke-width="0.8"/><path d="M -16,21.2 Q -9,23.8 -2,21.4 T 12,21.8" stroke="#E85D4A" stroke-width="1" fill="none" stroke-linecap="round"/><circle cx="-8" cy="21.5" r="0.9" fill="#E85D4A"/><circle cx="2" cy="22.1" r="0.8" fill="#E85D4A"/><circle cx="10" cy="21.6" r="0.7" fill="#E85D4A"/><ellipse cx="0" cy="23.1" rx="17" ry="1.2" fill="#0A1628" opacity="0.24"/>`,
+      currentboard: `<ellipse cx="0" cy="22" rx="22" ry="3.1" fill="#4A8BFF" stroke="#F5F1E8" stroke-width="0.8"/><path d="M -14,21.7 Q -4,18.9 8,21.7" stroke="#F5F1E8" stroke-width="0.85" fill="none" stroke-linecap="round"/><ellipse cx="0" cy="23.2" rx="16" ry="1.15" fill="#0A1628" opacity="0.22"/>`,
+      dualfin: `<ellipse cx="0" cy="22" rx="21.5" ry="3.1" fill="#F5F1E8" stroke="#4A8BFF" stroke-width="0.8"/><path d="M -10,22 L -8,25.7 L -5.8,22 Z" fill="#4A8BFF"/><path d="M 5.8,22 L 8,25.7 L 10,22 Z" fill="#4A8BFF"/><path d="M -13,21.5 Q 0,24.1 13,21.5" stroke="#D4A85E" stroke-width="0.7" fill="none"/>`,
+      glassboard: `<ellipse cx="0" cy="22" rx="22" ry="3.2" fill="#F5F1E8" opacity="0.18" stroke="#7B61FF" stroke-width="1.1"/><path d="M -16,22 Q -4,20.4 8,22" stroke="#7B61FF" stroke-width="0.9" fill="none" stroke-linecap="round" opacity="0.85"/><path d="M -10,20.4 Q -3,18.8 4,20.3" stroke="#F5F1E8" stroke-width="0.6" fill="none" stroke-linecap="round" opacity="0.7"/><ellipse cx="0" cy="23.2" rx="16" ry="1.3" fill="#7B61FF" opacity="0.18"/>`,
+      kayak: `<path d="M -20,22 Q -10,18 0,18 Q 10,18 20,22 Q 10,26 0,26 Q -10,26 -20,22 Z" fill="#4E5868" stroke="#7B61FF" stroke-width="1"/><path d="M -14,22 Q -7,20 0,20 Q 7,20 14,22" stroke="#F5F1E8" stroke-width="0.7" fill="none" opacity="0.7"/><rect x="-2" y="18.8" width="4" height="6.2" rx="1.2" fill="#F5F1E8" opacity="0.7"/><path d="M -25,16 L -14,21" stroke="#D4A85E" stroke-width="0.9" stroke-linecap="round"/><path d="M 25,16 L 14,21" stroke="#D4A85E" stroke-width="0.9" stroke-linecap="round"/>`,
+      canoe: `<path d="M -21,23 Q -12,18 0,18 Q 12,18 21,23 Q 10,25.8 0,25.8 Q -10,25.8 -21,23 Z" fill="#8E6F32" stroke="#7B61FF" stroke-width="1"/><path d="M -14,22.4 H 14" stroke="#F5F1E8" stroke-width="0.7" opacity="0.75"/><path d="M -24,18 L -16,22.5" stroke="#D4A85E" stroke-width="0.9" stroke-linecap="round"/><path d="M 24,18 L 16,22.5" stroke="#D4A85E" stroke-width="0.9" stroke-linecap="round"/><circle cx="-16" cy="22.5" r="1.2" fill="#D4A85E"/><circle cx="16" cy="22.5" r="1.2" fill="#D4A85E"/>`,
+      paddleboard: `<ellipse cx="0" cy="22" rx="25" ry="3.4" fill="#F5F1E8" stroke="#7B61FF" stroke-width="0.9"/><path d="M -3,12.6 L -3,23.2" stroke="#D4A85E" stroke-width="0.9"/><path d="M -5.2,12.8 H -0.8" stroke="#D4A85E" stroke-width="0.9" stroke-linecap="round"/><ellipse cx="0" cy="23" rx="18" ry="1.25" fill="#0A1628" opacity="0.22"/>`,
+      motorboat: `
+        <path d="M -23,23 Q -12,17 6,18 L 20,18 Q 23,18 24,21 L 24,24 Q 12,27 0,27 Q -12,27 -23,23 Z" fill="#F3D180" stroke="#D4A85E" stroke-width="1.1"/>
+        <rect x="3" y="14.5" width="8" height="4.5" rx="1" fill="#F5F1E8" opacity="0.85"/>
+        <path d="M 5,14.8 L 11,14.8 L 9.3,11.8 L 5.2,11.8 Z" fill="#4E5868"/>
+        <path d="M -18,24 Q -8,26 2,24" stroke="#F5F1E8" stroke-width="0.8" fill="none" opacity="0.7"/>
+        <path d="M 24,22 Q 28,21 30,23" stroke="#F3D180" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <path d="M 24,24 Q 29,24 32,27" stroke="#F3D180" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.7"/>
+        <path d="M -23,23 Q -12,17 6,18 L 20,18 Q 23,18 24,21 L 24,24 Q 12,27 0,27 Q -12,27 -23,23 Z" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.6"/>
+        <rect x="2.6" y="14.1" width="8.8" height="5.3" rx="1.2" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.6"/>
+        <circle cx="1.8" cy="18.1" r="2.1" fill="#F3D180" opacity="0.25"/>
+        <circle cx="25.2" cy="22.8" r="1.8" fill="#F3D180" opacity="0.33"/>
+        <circle cx="-20.4" cy="22.4" r="0.48" fill="#F5F1E8"/>
+        <circle cx="11.4" cy="14.0" r="0.42" fill="#F5F1E8"/>
+        <circle cx="30.2" cy="24.6" r="0.55" fill="#F5F1E8"/>
+      `,
+      jetski: `
+        <path d="M -18,24 Q -10,18 2,18 Q 10,18 16,21 Q 12,24 10,26 Q -2,27 -18,24 Z" fill="#F3D180" stroke="#FF9D2E" stroke-width="1.1"/>
+        <path d="M -2,18 L 4,14 L 9,14 L 6,18 Z" fill="#0A1628"/>
+        <rect x="-4" y="17.2" width="7" height="2.4" rx="1.2" fill="#E85D4A"/>
+        <path d="M 16,22 Q 22,22 26,26" stroke="#F3D180" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+        <path d="M 14,24 Q 21,24 28,30" stroke="#F3D180" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.65"/>
+        <path d="M -18,24 Q -10,18 2,18 Q 10,18 16,21 Q 12,24 10,26 Q -2,27 -18,24 Z" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.6"/>
+        <path d="M -2.6,18.1 L 4.3,13.6 L 9.5,13.6 L 6.5,18.2 Z" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.6"/>
+        <circle cx="-2.8" cy="18.2" r="1.7" fill="#F3D180" opacity="0.27"/>
+        <circle cx="17.8" cy="22.2" r="1.65" fill="#F3D180" opacity="0.32"/>
+        <circle cx="-14.2" cy="23.0" r="0.46" fill="#F5F1E8"/>
+        <circle cx="6.6" cy="14.3" r="0.4" fill="#F5F1E8"/>
+        <circle cx="24.8" cy="27.4" r="0.52" fill="#F5F1E8"/>
+      `,
+      dolphin: `
+        <path d="M -22,22 Q -18,12 -6,10 Q 8,8 18,14 Q 24,18 22,23 Q 18,28 8,29 Q -8,30 -18,27 Q -23,25 -22,22 Z" fill="#4E5868" stroke="#F3D180" stroke-width="1.1"/>
+        <path d="M -8,12 L -3,4 L 2,12 Z" fill="#4E5868" stroke="#F3D180" stroke-width="0.7"/>
+        <path d="M -22,22 L -29,18 L -31,22 L -29,26 Z" fill="#4E5868" stroke="#F3D180" stroke-width="0.7"/>
+        <path d="M -14,25 Q -2,28 12,24" stroke="#F5F1E8" stroke-width="0.8" fill="none" opacity="0.65"/>
+        <circle cx="11" cy="16" r="1.1" fill="#0A1628"/>
+        <path d="M 14,20 Q 18,21 20,19" stroke="#0A1628" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+        <circle cx="25" cy="15" r="1" fill="#4A8BFF" opacity="0.7"/>
+        <circle cx="28" cy="12" r="0.8" fill="#7B61FF" opacity="0.65"/>
+        <circle cx="28" cy="18" r="1.1" fill="#F3D180" opacity="0.6"/>
+        <path d="M -22,22 Q -18,12 -6,10 Q 8,8 18,14 Q 24,18 22,23 Q 18,28 8,29 Q -8,30 -18,27 Q -23,25 -22,22 Z" fill="none" stroke="#F3D180" stroke-width="2.0" opacity="0.24" stroke-linejoin="round"/>
+        <path d="M -22,22 Q -18,12 -6,10 Q 8,8 18,14 Q 24,18 22,23 Q 18,28 8,29 Q -8,30 -18,27 Q -23,25 -22,22 Z" fill="none" stroke="#4A8BFF" stroke-width="1.3" opacity="0.42" stroke-linejoin="round"/>
+        <path d="M -22,22 Q -18,12 -6,10 Q 8,8 18,14 Q 24,18 22,23 Q 18,28 8,29 Q -8,30 -18,27 Q -23,25 -22,22 Z" fill="none" stroke="#7B61FF" stroke-width="0.75" opacity="0.78" stroke-linejoin="round"/>
+        <path d="M -8,12 L -3,4 L 2,12" fill="none" stroke="#4A8BFF" stroke-width="1.0" opacity="0.42" stroke-linejoin="round"/>
+        <path d="M -22,22 L -29,18 L -31,22 L -29,26 Z" fill="none" stroke="#7B61FF" stroke-width="0.7" opacity="0.72" stroke-linejoin="round"/>
+        <path d="M -24,22 Q -19,8 -3,6 Q 12,4 23,13 Q 29,18 25,26 Q 19,32 6,32 Q -12,32 -21,29 Q -26,26 -24,22 Z" fill="none" stroke="#F3D180" stroke-width="1.3" opacity="0.2"/>
+        <path d="M -23,22 Q -18,10 -4,8 Q 10,6 20,14 Q 25,18 22,25 Q 17,30 6,30 Q -10,30 -19,27 Q -24,25 -23,22 Z" fill="none" stroke="#7B61FF" stroke-width="1.0" opacity="0.45"/>
+        <path d="M -15,25 Q -2,29 13,24" stroke="#F5F1E8" stroke-width="0.7" fill="none" opacity="0.3" stroke-linecap="round"/>
+        <circle cx="-30.0" cy="18.6" r="0.42" fill="#F3D180" opacity="0.36"/>
+        <circle cx="-10.4" cy="6.1" r="0.36" fill="#4A8BFF" opacity="0.34"/>
+        <circle cx="1.2" cy="4.6" r="0.5" fill="#7B61FF" opacity="0.42"/>
+        <circle cx="18.5" cy="10.5" r="0.42" fill="#F5F1E8" opacity="0.45"/>
+        <circle cx="26.6" cy="13.8" r="0.38" fill="#E85D4A" opacity="0.34"/>
+        <circle cx="29.5" cy="21.2" r="0.46" fill="#4A8BFF" opacity="0.38"/>
+      `
+    },
+    extra: {
+      bracelet: `<circle cx="-6.0" cy="0.6" r="1.55" fill="none" stroke="#F5F1E8" stroke-width="0.9"/><circle cx="-6.0" cy="0.6" r="0.42" fill="#D4A85E"/><circle cx="-4.7" cy="0.1" r="0.34" fill="#E85D4A"/>`,
+      keyring: `<circle cx="8.8" cy="1.4" r="1.5" fill="none" stroke="#D4A85E" stroke-width="0.6"/><path d="M 8.8,-0.2 L 8.8,2.8" stroke="#D4A85E" stroke-width="0.45"/><path d="M 10.8,1.4 Q 12.0,0.4 12.8,1.6 Q 12.0,2.7 10.8,1.4 Z" fill="#F5F1E8"/>`,
+      badgepin: `<circle cx="7.8" cy="1.3" r="2" fill="#F5F1E8" stroke="#D4A85E" stroke-width="0.6"/><path d="M 7.8,0.1 L 8.3,1.0 L 9.4,1.2 L 8.6,1.9 L 8.8,3.0 L 7.8,2.5 L 6.8,3.0 L 7.0,1.9 L 6.2,1.2 L 7.3,1.0 Z" fill="#E85D4A"/>`,
+      waterdrop: `<path d="M -5.4,-4.8 Q -7.2,-2.1 -6.0,-0.8 Q -4.7,0.3 -3.5,-1.0 Q -2.8,-2.1 -5.4,-4.8 Z" fill="#4A8BFF" stroke="#F5F1E8" stroke-width="0.45"/>`,
+      clubbracelet: `<circle cx="-6.1" cy="0.7" r="1.65" fill="none" stroke="#4A8BFF" stroke-width="0.9"/><circle cx="-6.1" cy="0.7" r="0.42" fill="#F5F1E8"/><circle cx="-4.5" cy="0.1" r="0.4" fill="#4A8BFF"/>`,
+      book: `<rect x="8.5" y="0.9" width="5.3" height="6.2" rx="0.8" fill="#F5F1E8" stroke="#0A1628" stroke-width="0.55"/><path d="M 11.15,1.4 V 6.5" stroke="#D4A85E" stroke-width="0.45"/><path d="M 9.4,2.4 H 12.8" stroke="#D4A85E" stroke-width="0.4"/><path d="M 9.4,3.7 H 12.8" stroke="#D4A85E" stroke-width="0.4"/>`,
+      compass: `<circle cx="9.8" cy="1.6" r="2.2" fill="#F5F1E8" stroke="#4A8BFF" stroke-width="0.6"/><path d="M 9.8,-1.0 V 4.2 M 7.2,1.6 H 12.4" stroke="#D4A85E" stroke-width="0.45"/><path d="M 9.8,1.6 L 11.0,0.4" stroke="#E85D4A" stroke-width="0.5"/><path d="M 8.4,-0.4 Q 7.3,-1.6 6.2,-1.0" stroke="#8E6F32" stroke-width="0.45" fill="none"/>`,
+      lightning: `<circle cx="-5.6" cy="-6.4" r="1.0" fill="none" stroke="#D4A85E" stroke-width="0.55"/><path d="M -4.9,-5.2 L -6.0,-3.4 L -5.0,-3.4 L -6.2,-1.1 L -4.8,-3.0 L -5.9,-3.0 Z" fill="#E85D4A"/>`,
+      sharkfin: `<path d="M 3.2,-9.6 Q 4.6,-12.2 6.4,-10.6 Q 5.8,-9.4 4.6,-9.0 Q 3.6,-8.8 3.2,-9.6 Z" fill="#0A1628"/><path d="M 3.8,-10.3 Q 4.8,-10.9 6.0,-10.7" stroke="#F5F1E8" stroke-width="0.32" fill="none" stroke-linecap="round"/>`,
+      medal: `<path d="M -3.7,-0.8 Q 0.0,0.1 3.7,-0.8" stroke="#D4A85E" stroke-width="1.05" fill="none" stroke-linecap="round"/><circle cx="0" cy="1.4" r="2.15" fill="#F3D180" stroke="#D4A85E" stroke-width="0.6"/><path d="M 0,0.1 L 0.6,1.2 L 1.8,1.4 L 0.9,2.3 L 1.1,3.6 L 0,3.0 L -1.1,3.6 L -0.9,2.3 L -1.8,1.4 L -0.6,1.2 Z" fill="#E85D4A"/>`,
+      auramedal: `
+        <path d="M -4.1,-0.8 Q 0.0,0.2 4.1,-0.8" stroke="#F3D180" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+        <circle cx="0" cy="1.5" r="2.4" fill="#F3D180" stroke="#FF9D2E" stroke-width="0.7"/>
+        <circle cx="0" cy="1.5" r="3.8" fill="none" stroke="#F3D180" stroke-width="0.6" opacity="0.5"/>
+        <circle cx="0" cy="1.5" r="5.3" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.3"/>
+        <path d="M -4.1,-0.8 Q 0.0,0.2 4.1,-0.8" stroke="#F3D180" stroke-width="0.4" opacity="0.6" fill="none" stroke-linecap="round"/>
+        <circle cx="0" cy="1.5" r="2.9" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.6"/>
+        <circle cx="-4.8" cy="1.5" r="1.35" fill="#F3D180" opacity="0.27"/>
+        <circle cx="4.8" cy="1.5" r="1.35" fill="#F3D180" opacity="0.27"/>
+        <circle cx="-2.8" cy="-0.7" r="0.46" fill="#F5F1E8"/>
+        <circle cx="0.0" cy="6.6" r="0.4" fill="#F5F1E8"/>
+        <circle cx="3.0" cy="-0.4" r="0.52" fill="#F5F1E8"/>
+      `,
+      whistle: `
+        <path d="M 8.0,1.0 h 4.4 a1.2,1.2 0 0 1 1.2,1.2 v 1.4 a1.2,1.2 0 0 1 -1.2,1.2 h -2.2 a1.9,1.9 0 0 1 -1.9,-1.9 Z" fill="#F3D180" stroke="#D4A85E" stroke-width="0.6"/>
+        <circle cx="12.3" cy="3.0" r="0.55" fill="#0A1628"/>
+        <path d="M 7.2,0.2 Q 6.4,-1.0 5.4,-0.5" stroke="#8E6F32" stroke-width="0.45" fill="none"/>
+        <path d="M 8.0,1.0 h 4.4 a1.2,1.2 0 0 1 1.2,1.2 v 1.4 a1.2,1.2 0 0 1 -1.2,1.2 h -2.2 a1.9,1.9 0 0 1 -1.9,-1.9 Z" fill="none" stroke="#F3D180" stroke-width="0.4" opacity="0.6"/>
+        <path d="M 7.2,0.2 Q 6.2,-1.2 5.1,-0.1" stroke="#F3D180" stroke-width="0.4" opacity="0.6" fill="none" stroke-linecap="round"/>
+        <circle cx="7.0" cy="1.4" r="1.15" fill="#F3D180" opacity="0.25"/>
+        <circle cx="13.2" cy="2.0" r="1.25" fill="#F3D180" opacity="0.32"/>
+        <circle cx="8.4" cy="4.8" r="0.42" fill="#F5F1E8"/>
+        <circle cx="11.2" cy="0.4" r="0.36" fill="#F5F1E8"/>
+        <circle cx="14.0" cy="4.0" r="0.5" fill="#F5F1E8"/>
+      `,
+      halopin: `
+        <path d="M -6.4,-15.8 Q 1.0,-19.4 8.2,-15.6" stroke="#F3D180" stroke-width="0.8" fill="none"/>
+        <path d="M -5.0,-16.4 Q 1.0,-18.6 6.6,-16.3" stroke="#F5F1E8" stroke-width="0.45" fill="none" opacity="0.7"/>
+        <path d="M -6.4,-15.8 Q 1.0,-19.4 8.2,-15.6" stroke="#F3D180" stroke-width="0.4" fill="none" opacity="0.6" stroke-linecap="round"/>
+        <path d="M -5.4,-16.8 Q 1.0,-19.0 7.2,-16.6" stroke="#F3D180" stroke-width="0.4" fill="none" opacity="0.6" stroke-linecap="round"/>
+        <circle cx="-6.8" cy="-15.6" r="1.15" fill="#F3D180" opacity="0.28"/>
+        <circle cx="8.6" cy="-15.5" r="1.15" fill="#F3D180" opacity="0.28"/>
+        <circle cx="-1.8" cy="-17.6" r="0.44" fill="#F5F1E8"/>
+        <circle cx="2.0" cy="-18.2" r="0.36" fill="#F5F1E8"/>
+        <circle cx="5.9" cy="-17.0" r="0.52" fill="#F5F1E8"/>
+      `,
+      aurorahalo: `
+        <path d="M -7.0,-16.3 Q 1.0,-20.2 9.0,-16.4" stroke="#F3D180" stroke-width="0.9" fill="none"/>
+        <path d="M -6.2,-17.3 Q 0.6,-20.6 7.6,-17.0" stroke="#4A8BFF" stroke-width="0.75" fill="none" opacity="0.8"/>
+        <path d="M -5.6,-15.1 Q 1.0,-13.0 7.0,-15.1" stroke="#7B61FF" stroke-width="0.75" fill="none" opacity="0.8"/>
+        <circle cx="-7.4" cy="-15.8" r="0.8" fill="#F3D180" opacity="0.7"/>
+        <circle cx="9.0" cy="-15.9" r="0.8" fill="#4A8BFF" opacity="0.7"/>
+        <path d="M -7.0,-16.3 Q 1.0,-20.2 9.0,-16.4" stroke="#F3D180" stroke-width="1.8" fill="none" opacity="0.24" stroke-linecap="round"/>
+        <path d="M -7.0,-16.3 Q 1.0,-20.2 9.0,-16.4" stroke="#4A8BFF" stroke-width="1.15" fill="none" opacity="0.42" stroke-linecap="round"/>
+        <path d="M -7.0,-16.3 Q 1.0,-20.2 9.0,-16.4" stroke="#7B61FF" stroke-width="0.7" fill="none" opacity="0.78" stroke-linecap="round"/>
+        <path d="M -8.6,-16.8 Q 1.0,-22.6 10.6,-16.9" stroke="#F3D180" stroke-width="1.2" fill="none" opacity="0.2" stroke-linecap="round"/>
+        <path d="M -6.4,-14.4 Q 1.0,-11.8 8.4,-14.5" stroke="#7B61FF" stroke-width="1.0" fill="none" opacity="0.45" stroke-linecap="round"/>
+        <path d="M -6.1,-15.0 Q 1.0,-12.8 8.1,-15.0" stroke="#F5F1E8" stroke-width="0.6" fill="none" opacity="0.28" stroke-linecap="round"/>
+        <circle cx="-8.8" cy="-17.2" r="0.42" fill="#F3D180" opacity="0.38"/>
+        <circle cx="-4.8" cy="-19.4" r="0.36" fill="#4A8BFF" opacity="0.34"/>
+        <circle cx="1.2" cy="-21.1" r="0.48" fill="#7B61FF" opacity="0.42"/>
+        <circle cx="7.6" cy="-19.1" r="0.4" fill="#F5F1E8" opacity="0.45"/>
+        <circle cx="10.6" cy="-16.8" r="0.36" fill="#E85D4A" opacity="0.34"/>
+      `
+    }
+  };
+
+  const defaultState = {
+    head: "HE1",
+    body: "BR1",
+    feet: "FR4",
+    ride: "RR1",
+    extra: "XN1"
+  };
+
+  Object.entries(defaultState).forEach(([slot, id]) => {
+    const item = ITEM_MAP[id];
+    if (!item) console.warn(`[dressup] defaultState.${slot} references unknown item: ${id}`);
+    else if (item.slot !== slot) console.warn(`[dressup] defaultState.${slot} points to slot ${item.slot}: ${id}`);
+  });
+
+  const uiState = {
+    activeSlot: "head"
+  };
+
+  const slotPanel = document.querySelector("[data-slot-panel]");
+  const inventoryGrid = document.querySelector("[data-inventory-grid]");
+  const currentSlotLabel = document.querySelector("[data-current-slot-label]");
+  const slotProgress = document.querySelector("[data-slot-progress]");
+  const totalProgress = document.querySelector("[data-total-progress]");
+  const setName = document.querySelector("[data-set-name]");
+  const setNote = document.querySelector("[data-set-note]");
+  const saveStatus = document.querySelector("[data-save-status]");
+
+  if (!slotPanel || !inventoryGrid) return;
+
+  function isUnlocked(item) {
+    return item.tier === "N" || DEMO_UNLOCKED.has(item.id);
+  }
+
+  function getItem(itemId) {
+    return ITEM_MAP[itemId] || null;
+  }
+
+  function getFirstUnlocked(slot) {
+    return SLOT_ITEMS[slot].find(isUnlocked) || SLOT_ITEMS[slot][0];
+  }
+
+  function hydrateState() {
+    let saved = null;
+    try {
+      saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    } catch (error) {
+      saved = null;
+    }
+    const next = { ...defaultState, ...(saved || {}) };
+    SLOT_ORDER.forEach((slot) => {
+      const item = getItem(next[slot]);
+      if (!item || item.slot !== slot || !isUnlocked(item)) {
+        next[slot] = getFirstUnlocked(slot).id;
+      }
+    });
+    return next;
+  }
+
+  let characterState = hydrateState();
+
+  function persistState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(characterState));
+    } catch (error) {
+      // noop
+    }
+  }
+
+  function buildAssetFragment(slot, itemId, scale = 1) {
+    const item = getItem(itemId);
+    if (!item) return "";
+    const fragment = SLOT_ASSETS[slot]?.[item.asset] || "";
+    if (!fragment) return "";
+    return scale === 1 ? fragment : `<g transform="scale(${scale})">${fragment}</g>`;
+  }
+
+  function renderSlotGroups() {
+    document.querySelectorAll("[data-slot-name]").forEach((node) => {
+      const slot = node.dataset.slotName;
+      const scale = Number(node.dataset.slotScale || 1);
+      node.innerHTML = buildAssetFragment(slot, characterState[slot], scale);
+    });
+  }
+
+  function buildMiniDuckBase() {
+    return `
+      <ellipse cx="0" cy="22" rx="18" ry="2.4" fill="#0A1628" opacity="0.12"/>
+      <g opacity="0.42">
+        <path d="M -11,1 L -15,-2 L -10,5 Z" fill="#4E5868"/>
+        <ellipse cx="0" cy="4" rx="10" ry="9" fill="#4E5868"/>
+        <ellipse cx="0" cy="7" rx="6" ry="5" fill="#F5F1E8" opacity="0.18"/>
+        <ellipse cx="-4" cy="3" rx="4" ry="5.5" fill="#0A1628" opacity="0.15"/>
+        <circle cx="1" cy="-8" r="6.8" fill="#4E5868"/>
+        <ellipse cx="7.5" cy="-7" rx="4" ry="1.5" fill="#4E5868" opacity="0.75"/>
+        <circle cx="3.5" cy="-10" r="1.1" fill="#0A1628" opacity="0.5"/>
+      </g>
+    `;
+  }
+
+  function renderInventoryArt(item) {
+    const fragment = buildAssetFragment(item.slot, item.id, 1);
+    const content = item.slot === "ride"
+      ? `${fragment}${buildMiniDuckBase()}`
+      : `${buildMiniDuckBase()}${fragment}`;
+    return `<svg viewBox="-32 -24 64 60" preserveAspectRatio="xMidYMid meet">${content}</svg>`;
+  }
+
+  function renderInventoryCard(item) {
+    const unlocked = isUnlocked(item);
+    const equipped = characterState[item.slot] === item.id;
+    const statePill = equipped
+      ? `<span class="inventory-pill state">EQUIPPED</span>`
+      : `<span class="inventory-pill">${unlocked ? "READY" : "LOCKED"}</span>`;
+    return `
+      <button type="button"
+              class="inventory-item tier-${item.tier}${unlocked ? "" : " is-locked"}${equipped ? " is-equipped" : ""}"
+              data-item-id="${item.id}">
+        <div class="inventory-badges">
+          <span class="inventory-pill">TIER ${item.tier}</span>
+          ${statePill}
+        </div>
+        <div class="inventory-art">
+          ${renderInventoryArt(item)}
+          ${unlocked ? "" : `<span class="inventory-lock">LOCK</span>`}
+        </div>
+        <div class="inventory-name">${item.name}</div>
+        <div class="inventory-mission">${unlocked ? `획득 완료 · ${item.mission}` : `${item.mission} 달성 시 해금`}</div>
+      </button>
+    `;
+  }
+
+  function renderSlotChips() {
+    slotPanel.querySelectorAll("[data-slot]").forEach((button) => {
+      const active = button.dataset.slot === uiState.activeSlot;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+  }
+
+  function renderInventory() {
+    const items = SLOT_ITEMS[uiState.activeSlot];
+    inventoryGrid.innerHTML = items.map(renderInventoryCard).join("");
+  }
+
+  function renderMeta() {
+    const unlockedTotal = ITEMS.filter(isUnlocked).length;
+    const unlockedSlot = SLOT_ITEMS[uiState.activeSlot].filter(isUnlocked).length;
+    const headName = getItem(characterState.head)?.name || "";
+    const rideName = getItem(characterState.ride)?.name || "";
+    const bodyName = getItem(characterState.body)?.name || "";
+    const feetName = getItem(characterState.feet)?.name || "";
+    const extraName = getItem(characterState.extra)?.name || "";
+
+    currentSlotLabel.textContent = `${SLOT_LABELS[uiState.activeSlot]} 인벤토리`;
+    slotProgress.textContent = `${unlockedSlot} / ${SLOT_ITEMS[uiState.activeSlot].length}`;
+    totalProgress.textContent = `04 · ${unlockedTotal} / 70`;
+    setName.textContent = `${rideName} · ${headName}`;
+    setNote.textContent = `상의 ${bodyName} · 발 ${feetName} · 악세서리 ${extraName}`;
+    saveStatus.textContent = "변경 사항은 이 브라우저에 저장되며 새로고침 후에도 유지됩니다.";
+  }
+
+  function renderAll() {
+    renderSlotGroups();
+    renderSlotChips();
+    renderInventory();
+    renderMeta();
+  }
+
+  slotPanel.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-slot]");
+    if (!button) return;
+    uiState.activeSlot = button.dataset.slot;
+    renderAll();
+  });
+
+  inventoryGrid.addEventListener("click", (event) => {
+    const card = event.target.closest("[data-item-id]");
+    if (!card) return;
+    const item = getItem(card.dataset.itemId);
+    if (!item || !isUnlocked(item)) return;
+    characterState[item.slot] = item.id;
+    persistState();
+    renderAll();
+  });
+
+  renderAll();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>서퍼 카드 v3 · 관리자 리뷰 · 학생 뷰 동시 열기</title>
+<style>
+  :root {
+    --ink: #0A1628;
+    --paper: #F5F1E8;
+    --paper-dim: #C7BFAF;
+    --gold: #D4A85E;
+    --gold-hi: #F3D180;
+    --amber: #FF9D2E;
+    --coral: #E85D4A;
+    --blue: #4A8BFF;
+    --purple: #7B61FF;
+    --steel: #4E5868;
+    --bg-0: #05090F;
+    --bg-1: #0C1524;
+    --bg-2: #111D33;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg-0);
+    color: var(--paper);
+    line-height: 1.4;
+  }
+  .admin-shell {
+    display: grid;
+    grid-template-columns: minmax(360px, 420px) 1fr;
+    height: 100vh;
+  }
+  .pane-user {
+    border-right: 1px solid rgba(255,255,255,0.08);
+    background: var(--bg-1);
+    display: flex;
+    flex-direction: column;
+  }
+  .pane-user-head {
+    padding: 10px 14px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--gold-hi);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .pane-user-head small { color: var(--paper-dim); letter-spacing: 0.06em; }
+  .pane-user iframe {
+    flex: 1;
+    width: 100%;
+    border: 0;
+    background: var(--bg-0);
+  }
+  .pane-admin {
+    overflow-y: auto;
+    background: var(--bg-0);
+  }
+  .admin-head {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: linear-gradient(180deg, var(--bg-0) 72%, rgba(5,9,15,0));
+    padding: 16px 22px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .admin-title {
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .admin-title h1 {
+    margin: 0; font-size: 20px; letter-spacing: 0.04em; color: var(--paper);
+  }
+  .admin-title .tag {
+    font-size: 11px; padding: 3px 8px; border-radius: 999px;
+    background: rgba(243,209,128,0.14); color: var(--gold-hi); letter-spacing: 0.12em;
+  }
+  .admin-sub { font-size: 12px; color: var(--paper-dim); margin-top: 4px; }
+  .summary-row {
+    display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap;
+  }
+  .summary-chip {
+    font-size: 12px; padding: 6px 10px; border-radius: 10px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+  }
+  .summary-chip strong { color: var(--gold-hi); margin-right: 6px; }
+  .summary-chip.delta-open { border-color: rgba(74,139,255,0.4); }
+  .summary-chip.delta-close { border-color: rgba(232,93,74,0.4); }
+  .filter-bar {
+    display: flex; gap: 8px; margin-top: 14px; align-items: center; flex-wrap: wrap;
+  }
+  .filter-bar select, .filter-bar input {
+    background: var(--bg-2); color: var(--paper);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px; padding: 6px 10px; font-size: 13px;
+    font-family: inherit;
+  }
+  .filter-bar input[type="search"] { flex: 1; min-width: 180px; }
+  .filter-bar label {
+    font-size: 12px; color: var(--paper-dim);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .actions { display: flex; gap: 8px; }
+  .btn {
+    background: linear-gradient(135deg, var(--gold-hi), var(--amber));
+    color: var(--ink); border: 0; border-radius: 8px;
+    font-family: inherit; font-weight: 700; font-size: 12px;
+    letter-spacing: 0.08em; padding: 8px 14px; cursor: pointer;
+  }
+  .btn.ghost {
+    background: transparent; color: var(--paper-dim);
+    border: 1px solid rgba(255,255,255,0.12);
+    font-weight: 500;
+  }
+  .btn.ghost:hover { color: var(--paper); border-color: rgba(255,255,255,0.24); }
+  table.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0 60px;
+  }
+  .admin-table thead th {
+    position: sticky;
+    top: 136px;
+    background: var(--bg-0);
+    z-index: 5;
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--paper-dim);
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    text-transform: uppercase;
+  }
+  .admin-table tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+  }
+  .admin-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+  .admin-table tbody tr.changed {
+    background: rgba(243,209,128,0.06);
+  }
+  .admin-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  .slot-chip {
+    font-size: 11px; padding: 2px 8px; border-radius: 999px;
+    background: rgba(255,255,255,0.06); color: var(--paper);
+    letter-spacing: 0.06em;
+  }
+  .tier-pill {
+    font-size: 11px; padding: 2px 8px; border-radius: 6px;
+    font-weight: 700; letter-spacing: 0.08em;
+  }
+  .tier-N { background: rgba(78,88,104,0.3); color: #B8C2D1; }
+  .tier-R { background: rgba(74,139,255,0.2); color: #86B0FF; }
+  .tier-E { background: rgba(123,97,255,0.22); color: #AC97FF; }
+  .tier-L { background: linear-gradient(135deg, rgba(243,209,128,0.22), rgba(255,157,46,0.22)); color: var(--gold-hi); }
+  .tier-M {
+    background: linear-gradient(135deg, rgba(243,209,128,0.25), rgba(74,139,255,0.25), rgba(123,97,255,0.25));
+    color: var(--gold-hi);
+    border: 1px solid rgba(243,209,128,0.3);
+  }
+  .difficulty-pill {
+    font-size: 10.5px; padding: 2px 7px; border-radius: 5px;
+    background: rgba(255,255,255,0.06);
+    color: var(--paper-dim); letter-spacing: 0.06em;
+  }
+  .difficulty-pill.d-base { color: #C8C8C8; }
+  .difficulty-pill.d-weekly { color: #86B0FF; background: rgba(74,139,255,0.14); }
+  .difficulty-pill.d-monthly { color: #AC97FF; background: rgba(123,97,255,0.14); }
+  .difficulty-pill.d-season { color: var(--gold-hi); background: rgba(243,209,128,0.12); }
+  .difficulty-pill.d-annual { color: var(--amber); background: rgba(255,157,46,0.14); }
+  .item-id { font-family: "SF Mono", Menlo, monospace; font-size: 11px; color: var(--paper-dim); }
+  .item-name { color: var(--paper); font-weight: 500; }
+  .item-mission {
+    color: var(--paper-dim);
+    font-size: 12.5px;
+  }
+  input[type="checkbox"].open-toggle {
+    width: 18px; height: 18px;
+    accent-color: var(--gold-hi);
+    cursor: pointer;
+  }
+  textarea.memo {
+    width: 100%;
+    min-height: 28px;
+    max-height: 96px;
+    resize: vertical;
+    background: var(--bg-1);
+    color: var(--paper);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-size: 12px;
+    font-family: inherit;
+  }
+  textarea.memo::placeholder { color: rgba(199,191,175,0.35); }
+  .status-cell {
+    display: flex; gap: 6px; align-items: center;
+  }
+  .state-pill {
+    font-size: 10px; padding: 2px 7px; border-radius: 5px;
+    letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700;
+  }
+  .state-open { background: rgba(67,199,120,0.18); color: #78E0A0; }
+  .state-lock { background: rgba(232,93,74,0.18); color: #FF8D7C; }
+  .state-default { background: rgba(212,168,94,0.18); color: var(--gold-hi); }
+  .lock-reason-head {
+    font-size: 10px; color: var(--paper-dim); letter-spacing: 0.08em;
+    margin-bottom: 3px; text-transform: uppercase;
+  }
+  .decision-out {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(5,9,15,0.95);
+    border-top: 1px solid rgba(243,209,128,0.2);
+    padding: 12px 22px;
+    font-size: 12px;
+    display: none;
+  }
+  .decision-out.active { display: block; }
+  .decision-out pre {
+    background: var(--bg-2);
+    padding: 10px;
+    margin: 8px 0 0;
+    border-radius: 8px;
+    max-height: 180px; overflow: auto;
+    color: var(--paper);
+    font-size: 11.5px;
+    line-height: 1.45;
+  }
+  .decision-out .close-x {
+    float: right; background: transparent; border: 0; color: var(--paper-dim); cursor: pointer;
+    font-size: 14px;
+  }
+  .row-locked .item-name { color: var(--paper-dim); }
+  .admin-footer {
+    padding: 14px 22px 18px;
+    font-size: 11px;
+    color: var(--paper-dim);
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+</style>
+</head>
+<body>
+<div class="admin-shell">
+
+  <!-- ============ LEFT: STUDENT VIEW (iframe) ============ -->
+  <section class="pane-user">
+    <div class="pane-user-head">
+      <span>학생 뷰 · STUDENT VIEW</span>
+      <small>iframe · v3-20260420.html</small>
+    </div>
+    <iframe id="student-frame" src="index.html" title="student view"></iframe>
+  </section>
+
+  <!-- ============ RIGHT: ADMIN REVIEW PANEL ============ -->
+  <section class="pane-admin">
+
+    <div class="admin-head">
+      <div class="admin-title">
+        <h1>관리자 리뷰</h1>
+        <span class="tag">ADMIN · DRESS UP · v3</span>
+      </div>
+      <div class="admin-sub">
+        어떤 아이템을 지금 시즌에 열어두고, 어떤 건 잠가둘지 여기서 의논합니다.
+        체크박스 = 학생이 획득 가능. 메모는 "왜 이렇게 결정했는지"를 남기는 용도.
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-chip"><strong id="total-count">70</strong>아이템</div>
+        <div class="summary-chip"><strong id="open-count">0</strong>현재 열림</div>
+        <div class="summary-chip"><strong id="lock-count">0</strong>현재 잠김</div>
+        <div class="summary-chip delta-open"><strong id="delta-open">0</strong>추가로 열기</div>
+        <div class="summary-chip delta-close"><strong id="delta-close">0</strong>새로 닫기</div>
+        <div class="summary-chip"><strong id="memo-count">0</strong>메모</div>
+      </div>
+
+      <div class="filter-bar">
+        <select id="f-slot">
+          <option value="">모든 슬롯</option>
+          <option value="head">모자</option>
+          <option value="body">상의</option>
+          <option value="feet">발</option>
+          <option value="ride">탈 것</option>
+          <option value="extra">악세서리</option>
+        </select>
+        <select id="f-tier">
+          <option value="">모든 티어</option>
+          <option value="N">N · 기본</option>
+          <option value="R">R · 레어</option>
+          <option value="E">E · 에픽</option>
+          <option value="L">L · 전설</option>
+          <option value="M">M · 신화</option>
+        </select>
+        <select id="f-status">
+          <option value="">모든 상태</option>
+          <option value="open">열림</option>
+          <option value="lock">잠김</option>
+          <option value="changed">변경됨</option>
+        </select>
+        <input type="search" id="f-search" placeholder="이름 / 미션 검색…">
+        <div class="actions">
+          <button class="btn" id="btn-export">결정 요약</button>
+          <button class="btn ghost" id="btn-reset">원복</button>
+          <button class="btn ghost" id="btn-reload">학생 뷰 새로고침</button>
+        </div>
+      </div>
+    </div>
+
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th style="width:60px">열기</th>
+          <th style="width:56px">슬롯</th>
+          <th style="width:48px">티어</th>
+          <th>아이템</th>
+          <th style="width:28%">미션 (해금 조건)</th>
+          <th style="width:78px">난이도</th>
+          <th style="width:92px">상태</th>
+          <th style="width:26%">메모 · 결정 사유</th>
+        </tr>
+      </thead>
+      <tbody id="admin-tbody"></tbody>
+    </table>
+
+    <div class="admin-footer">
+      메모에 남긴 내용은 "결정 요약" 버튼으로 JSON 으로 묶어서 확인할 수 있습니다.
+      학생에게 실시간 반영은 안 됩니다 (이 파일은 관리자 mockup). 최종 결정이 나면
+      <code>DEMO_UNLOCKED</code> 또는 실제 해금 규칙에 반영하겠습니다.
+    </div>
+
+  </section>
+</div>
+
+<div class="decision-out" id="decision-out">
+  <button class="close-x" onclick="document.getElementById('decision-out').classList.remove('active')">✕</button>
+  <strong>결정 요약 JSON</strong> — 복사해서 Slack·문서에 붙이거나, 그대로 넘겨주세요.
+  <pre id="decision-pre"></pre>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ───── 1. 카탈로그 (v3 HTML 의 SLOT_ITEMS 와 동일 구조) ─────
+  const SLOT_LABELS = { head: "모자", body: "상의", feet: "발", ride: "탈 것", extra: "악세서리" };
+  const TIER_LABELS = { N: "기본", R: "레어", E: "에픽", L: "전설", M: "신화" };
+
+  const SLOT_ITEMS = {
+    head: [
+      { id:"HN1", tier:"N", name:"맨머리 파도결", mission:"가입 즉시 기본 지급" },
+      { id:"HN2", tier:"N", name:"코랄 스타트 밴드", mission:"가입 즉시 기본 지급" },
+      { id:"HN3", tier:"N", name:"종이파도 바이저", mission:"가입 즉시 기본 지급" },
+      { id:"HR1", tier:"R", name:"잔물결 선캡", mission:"첫 실전 응시 완료" },
+      { id:"HR2", tier:"R", name:"롱웨이브 버킷햇", mission:"2주 연속 응시" },
+      { id:"HR3", tier:"R", name:"선셋 리본 캡", mission:"주간 숙제 100% 2회" },
+      { id:"HR4", tier:"R", name:"조개핀 스냅캡", mission:"4주 완주" },
+      { id:"HE1", tier:"E", name:"크레스트 별핀", mission:"월간 등급 1단계 점프" },
+      { id:"HE2", tier:"E", name:"정박 앵커캡", mission:"월간 코호트 상위 20% 진입" },
+      { id:"HE3", tier:"E", name:"샤크핀 헬멧", mission:"한 회차 50명 이상 제치기" },
+      { id:"HL1", tier:"L", name:"퍼스트크라운 하프왕관", mission:"시즌 첫 1등급 진입" },
+      { id:"HL2", tier:"L", name:"제트웨이브 캡틴캡", mission:"3개월 스트릭 달성" },
+      { id:"HL3", tier:"L", name:"북극성 파도관", mission:"시즌 코호트 1위 달성" },
+      { id:"HM1", tier:"M", name:"새벽조류 오로라 크라운", mission:"1등급 4회 유지" }
+    ],
+    body: [
+      { id:"BN1", tier:"N", name:"모래사장 래시가드", mission:"가입 즉시 기본 지급" },
+      { id:"BN2", tier:"N", name:"크림 파도 조끼", mission:"가입 즉시 기본 지급" },
+      { id:"BN3", tier:"N", name:"홈룸 웻수트", mission:"가입 즉시 기본 지급" },
+      { id:"BR1", tier:"R", name:"리프 스트라이프 래시가드", mission:"첫 숙제 100% 완료" },
+      { id:"BR2", tier:"R", name:"비치클럽 후디조끼", mission:"1주 5/5 출석" },
+      { id:"BR3", tier:"R", name:"서프노트 세일러탑", mission:"첫 오답노트 30문제 정리" },
+      { id:"BR4", tier:"R", name:"코호트 팀베스트", mission:"4회 연속 재응시" },
+      { id:"BE1", tier:"E", name:"크레스트 스프린트 수트", mission:"월간 6회 응시" },
+      { id:"BE2", tier:"E", name:"문풀 투명 베스트", mission:"월간 오답복기 100문제" },
+      { id:"BE3", tier:"E", name:"파일럿 윈드브레이커", mission:"3회 연속 점수 상승" },
+      { id:"BE4", tier:"E", name:"딥블루 레이스 웻수트", mission:"유형 3개 이상 70% 돌파" },
+      { id:"BL1", tier:"L", name:"골드타이드 캡틴코트", mission:"시즌 상위 10% 2회" },
+      { id:"BL2", tier:"L", name:"제트웨이브 스프레이 코트", mission:"시즌 100명 이상 제치기" },
+      { id:"BM1", tier:"M", name:"오로라 세일 로브", mission:"수능 D-100 달성" }
+    ],
+    feet: [
+      { id:"FN1", tier:"N", name:"맨발 패들", mission:"가입 즉시 기본 지급" },
+      { id:"FN2", tier:"N", name:"코랄 플립핀", mission:"가입 즉시 기본 지급" },
+      { id:"FN3", tier:"N", name:"샌드스텝 아쿠아슈즈", mission:"가입 즉시 기본 지급" },
+      { id:"FR1", tier:"R", name:"리듬 레이스 핀", mission:"루틴 기록 7일 연속" },
+      { id:"FR2", tier:"R", name:"스트릭 스플래시 핀", mission:"14일 연속 응시" },
+      { id:"FR3", tier:"R", name:"클럽 덱슈즈", mission:"어휘 퀴즈 5일 연속 만점" },
+      { id:"FR4", tier:"R", name:"파도결 로프샌들", mission:"20일 내 4회 응시" },
+      { id:"FE1", tier:"E", name:"점프부스트 터보핀", mission:"월간 30명 이상 제치기" },
+      { id:"FE2", tier:"E", name:"문글라이드 투명핀", mission:"듣기·어휘·빈칸 성장률 합계 +15%p" },
+      { id:"FE3", tier:"E", name:"리프러너 하이드로부츠", mission:"월간 21일 스트릭" },
+      { id:"FE4", tier:"E", name:"카누 킥오프 패들핀", mission:"월간 코호트 5위 이내" },
+      { id:"FL1", tier:"L", name:"골든웨이크 제트부츠", mission:"시즌 등급 2단계 점프" },
+      { id:"FL2", tier:"L", name:"크레스트 항해장화", mission:"시즌 10회 이상 90분 풀타임 응시" },
+      { id:"FM1", tier:"M", name:"돌핀테일 미스틱 핀", mission:"연간 30회 응시 + 100일 루틴" }
+    ],
+    ride: [
+      { id:"RN1", tier:"N", name:"베이직 쇼어보드", mission:"가입 즉시 기본 지급" },
+      { id:"RN2", tier:"N", name:"크림라인 쇼트보드", mission:"가입 즉시 기본 지급" },
+      { id:"RN3", tier:"N", name:"샌드핀 연습보드", mission:"가입 즉시 기본 지급" },
+      { id:"RR1", tier:"R", name:"롱웨이브 롱보드", mission:"첫 실전 응시 완료" },
+      { id:"RR2", tier:"R", name:"코랄 리프보드", mission:"2주 완주" },
+      { id:"RR3", tier:"R", name:"블루커런트 글라이더", mission:"이번 파도 10명 이상 제치기" },
+      { id:"RR4", tier:"R", name:"듀얼핀 미드보드", mission:"유형 정확도 60% 돌파" },
+      { id:"RE1", tier:"E", name:"미러글래스 투명보드", mission:"월간 등급 1단계 상승" },
+      { id:"RE2", tier:"E", name:"리버런 카약", mission:"월간 50명 이상 제치기" },
+      { id:"RE3", tier:"E", name:"크루패들 카누", mission:"월간 6회 연속 응시" },
+      { id:"RE4", tier:"E", name:"문베이 패들보드", mission:"월간 8회 응시" },
+      { id:"RL1", tier:"L", name:"골든타이드 모터보트", mission:"시즌 누적 150명 이상 제치기" },
+      { id:"RL2", tier:"L", name:"제트웨이크 제트스키", mission:"시즌 상위 5% 2회 달성" },
+      { id:"RM1", tier:"M", name:"돌핀 에볼브 라이드", mission:"1등급 4회 유지 + 누적 300명 이상 제치기" }
+    ],
+    extra: [
+      { id:"XN1", tier:"N", name:"입문 파도팔찌", mission:"가입 즉시 기본 지급" },
+      { id:"XN2", tier:"N", name:"조개방울 키링", mission:"가입 즉시 기본 지급" },
+      { id:"XN3", tier:"N", name:"출석 배지핀", mission:"가입 즉시 기본 지급" },
+      { id:"XR1", tier:"R", name:"물방울 이어링", mission:"첫 질문 인증 1회" },
+      { id:"XR2", tier:"R", name:"코럴 클럽 팔찌", mission:"3회 연속 과제 제출" },
+      { id:"XR3", tier:"R", name:"파도일기 미니책", mission:"복습 기록 5일 연속" },
+      { id:"XR4", tier:"R", name:"로프 나침반 참", mission:"첫 목표설정 상담 완료" },
+      { id:"XE1", tier:"E", name:"번개 이어커프", mission:"월간 10문제 연속 정답 5회" },
+      { id:"XE2", tier:"E", name:"샤크핀 머리장식", mission:"월간 2회 이상 30명 제치기" },
+      { id:"XE3", tier:"E", name:"앵커 메달", mission:"월간 코호트 상위 20% 2회" },
+      { id:"XL1", tier:"L", name:"골드 오라 메달", mission:"시즌 클래스 MVP 투표 1위" },
+      { id:"XL2", tier:"L", name:"캡틴 휘슬 참", mission:"시즌 풀참 12회 달성" },
+      { id:"XL3", tier:"L", name:"스타리프 후광핀", mission:"시즌 1등급 유지 2회" },
+      { id:"XM1", tier:"M", name:"오로라 파도 후광", mission:"연간 시즌 MVP 2회 달성" }
+    ]
+  };
+
+  const DEMO_UNLOCKED = new Set([
+    "HR1","HR2","HR3","BR1","BR2","FR1","FR4",
+    "RR1","RR2","RR3","XR1","XR2",
+    "HE1","BE1","RE1","XE1"
+  ]);
+
+  const ALL_ITEMS = Object.entries(SLOT_ITEMS).flatMap(([slot, arr]) =>
+    arr.map(i => ({...i, slot}))
+  );
+
+  function initialOpen(item) {
+    return item.tier === "N" || DEMO_UNLOCKED.has(item.id);
+  }
+
+  function classifyDifficulty(mission) {
+    const m = mission || "";
+    if (/가입 즉시|기본 지급/.test(m)) return { key:"base", label:"기본" };
+    if (/주|7일|14일|이번 파도|첫 실전|첫 숙제|첫 질문|첫 오답|첫 목표|5일|3회|4회/.test(m)) return { key:"weekly", label:"주간" };
+    if (/월간|21일|20일 내/.test(m)) return { key:"monthly", label:"월간" };
+    if (/시즌|D-100|90분 풀타임/.test(m)) return { key:"season", label:"시즌" };
+    if (/연간|100일|300명/.test(m)) return { key:"annual", label:"연간" };
+    return { key:"monthly", label:"월간" };
+  }
+
+  // ───── 2. 상태 ─────
+  const state = {
+    open: {},    // id -> boolean (현재 관리자가 결정한 상태)
+    memo: {},    // id -> string
+    orig: {}     // id -> boolean (기본값)
+  };
+  ALL_ITEMS.forEach(i => {
+    const v = initialOpen(i);
+    state.open[i.id] = v;
+    state.orig[i.id] = v;
+    state.memo[i.id] = "";
+  });
+
+  // ───── 3. DOM refs ─────
+  const tbody = document.getElementById("admin-tbody");
+  const fSlot = document.getElementById("f-slot");
+  const fTier = document.getElementById("f-tier");
+  const fStatus = document.getElementById("f-status");
+  const fSearch = document.getElementById("f-search");
+  const elTotal = document.getElementById("total-count");
+  const elOpen = document.getElementById("open-count");
+  const elLock = document.getElementById("lock-count");
+  const elDOpen = document.getElementById("delta-open");
+  const elDClose = document.getElementById("delta-close");
+  const elMemo = document.getElementById("memo-count");
+
+  // ───── 4. 렌더 ─────
+  function stateOfRow(item) {
+    const cur = state.open[item.id];
+    const orig = state.orig[item.id];
+    if (cur === orig) {
+      if (item.tier === "N") return { cls: "state-default", label: "기본 지급" };
+      return cur ? { cls: "state-open", label: "열림" } : { cls: "state-lock", label: "잠김" };
+    }
+    return cur
+      ? { cls: "state-open", label: "→ 열기" }
+      : { cls: "state-lock", label: "→ 닫기" };
+  }
+
+  function rowHtml(item) {
+    const diff = classifyDifficulty(item.mission);
+    const st = stateOfRow(item);
+    const changed = state.open[item.id] !== state.orig[item.id] || state.memo[item.id].trim().length > 0;
+    const lockedNow = !state.open[item.id];
+    return `
+      <tr class="${changed ? "changed" : ""} ${lockedNow ? "row-locked" : ""}" data-id="${item.id}">
+        <td>
+          <input type="checkbox" class="open-toggle" data-id="${item.id}" ${state.open[item.id] ? "checked" : ""} ${item.tier === "N" ? "disabled title='N 티어는 항상 기본 지급'" : ""}>
+        </td>
+        <td><span class="slot-chip">${SLOT_LABELS[item.slot]}</span></td>
+        <td><span class="tier-pill tier-${item.tier}">${item.tier}</span></td>
+        <td>
+          <div class="item-name">${item.name}</div>
+          <div class="item-id">${item.id}</div>
+        </td>
+        <td class="item-mission">
+          <div class="lock-reason-head">해금 조건</div>
+          ${item.mission}
+        </td>
+        <td><span class="difficulty-pill d-${diff.key}">${diff.label}</span></td>
+        <td><div class="status-cell"><span class="state-pill ${st.cls}">${st.label}</span></div></td>
+        <td>
+          <textarea class="memo" data-id="${item.id}" placeholder="왜 이렇게 두는지 / 다음 시즌 메모…">${state.memo[item.id]}</textarea>
+        </td>
+      </tr>
+    `;
+  }
+
+  function applyFilters(items) {
+    const slot = fSlot.value;
+    const tier = fTier.value;
+    const status = fStatus.value;
+    const q = fSearch.value.trim().toLowerCase();
+    return items.filter(i => {
+      if (slot && i.slot !== slot) return false;
+      if (tier && i.tier !== tier) return false;
+      if (status === "open" && !state.open[i.id]) return false;
+      if (status === "lock" && state.open[i.id]) return false;
+      if (status === "changed") {
+        const ch = state.open[i.id] !== state.orig[i.id] || state.memo[i.id].trim().length > 0;
+        if (!ch) return false;
+      }
+      if (q) {
+        const hay = (i.name + " " + i.mission + " " + i.id).toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderSummary() {
+    const total = ALL_ITEMS.length;
+    const open = ALL_ITEMS.filter(i => state.open[i.id]).length;
+    const lock = total - open;
+    const dOpen = ALL_ITEMS.filter(i => state.open[i.id] && !state.orig[i.id]).length;
+    const dClose = ALL_ITEMS.filter(i => !state.open[i.id] && state.orig[i.id]).length;
+    const memoN = ALL_ITEMS.filter(i => state.memo[i.id].trim().length > 0).length;
+    elTotal.textContent = total;
+    elOpen.textContent = open;
+    elLock.textContent = lock;
+    elDOpen.textContent = dOpen;
+    elDClose.textContent = dClose;
+    elMemo.textContent = memoN;
+  }
+
+  function renderTable() {
+    const visible = applyFilters(ALL_ITEMS);
+    tbody.innerHTML = visible.map(rowHtml).join("");
+    renderSummary();
+  }
+
+  // ───── 5. 이벤트 ─────
+  tbody.addEventListener("change", (e) => {
+    const t = e.target;
+    if (t.classList.contains("open-toggle")) {
+      const id = t.dataset.id;
+      state.open[id] = t.checked;
+      renderTable();
+    }
+  });
+
+  tbody.addEventListener("input", (e) => {
+    const t = e.target;
+    if (t.classList.contains("memo")) {
+      state.memo[t.dataset.id] = t.value;
+      renderSummary();
+    }
+  });
+
+  [fSlot, fTier, fStatus, fSearch].forEach(el => el.addEventListener("input", renderTable));
+
+  document.getElementById("btn-reset").addEventListener("click", () => {
+    if (!confirm("모든 체크박스와 메모를 기본 상태로 되돌릴까요?")) return;
+    ALL_ITEMS.forEach(i => { state.open[i.id] = state.orig[i.id]; state.memo[i.id] = ""; });
+    renderTable();
+  });
+
+  document.getElementById("btn-reload").addEventListener("click", () => {
+    const f = document.getElementById("student-frame");
+    f.src = f.src;
+  });
+
+  document.getElementById("btn-export").addEventListener("click", () => {
+    const addOpen = [];
+    const addClose = [];
+    const memos = {};
+    ALL_ITEMS.forEach(i => {
+      if (state.open[i.id] && !state.orig[i.id]) addOpen.push({id:i.id, slot:i.slot, tier:i.tier, name:i.name});
+      if (!state.open[i.id] && state.orig[i.id]) addClose.push({id:i.id, slot:i.slot, tier:i.tier, name:i.name});
+      if (state.memo[i.id].trim()) memos[i.id] = state.memo[i.id].trim();
+    });
+    const payload = {
+      generated_at: new Date().toISOString(),
+      total_items: ALL_ITEMS.length,
+      currently_open: ALL_ITEMS.filter(i => state.open[i.id]).length,
+      delta: { open_more: addOpen, close_more: addClose },
+      admin_memos: memos
+    };
+    document.getElementById("decision-pre").textContent = JSON.stringify(payload, null, 2);
+    document.getElementById("decision-out").classList.add("active");
+  });
+
+  renderTable();
+})();
+</script>
+</body>
+</html>
